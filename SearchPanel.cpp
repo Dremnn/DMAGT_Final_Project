@@ -40,25 +40,61 @@ SearchPanel::SearchPanel(wxWindow* parent)
     scrolledWindow->SetScrollRate(0, 5); // Tốc độ cuộn
 
     wxBoxSizer* resultsSizer = new wxBoxSizer(wxVERTICAL);
-    for (int i = 1; i <= 15; ++i) {
-        wxString placeName = wxString::Format("Dinh Doc Lap, District %d", i);
-        wxString placeAddress = "135 Nam Ky Khoi Nghia, Ben Thanh";
+    // Danh sách cố định các địa danh nổi tiếng ở Quận 1
+    static const std::vector<std::pair<wxString, wxString>> famousPlacesQ1 = {
+        { "Dinh Độc Lập", "135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1" },
+        { "Nhà Thờ Đức Bà", "01 Công Xã Paris, Bến Nghé, Quận 1" },
+        { "Bưu Điện Trung Tâm", "02 Công Xã Paris, Bến Nghé, Quận 1" },
+        { "Chợ Bến Thành", "Lê Lợi, Bến Thành, Quận 1" },
+        { "Phố đi bộ Nguyễn Huệ", "Nguyễn Huệ, Bến Nghé, Quận 1" },
+        { "Bitexco Financial Tower", "02 Hải Triều, Bến Nghé, Quận 1" },
+        { "Nhà hát Thành Phố", "07 Công Trường Lam Sơn, Bến Nghé, Quận 1" },
+        { "Công viên 23/9", "Phạm Ngũ Lão, Quận 1" },
+        { "Bảo tàng Mỹ thuật", "97 Phó Đức Chính, Nguyễn Thái Bình, Quận 1" }
+    };
 
-        wxStaticText* nameText = new wxStaticText(scrolledWindow, wxID_ANY, placeName);
-        wxStaticText* addressText = new wxStaticText(scrolledWindow, wxID_ANY, placeAddress);
+    // 👉 Hàm tiện ích để hiển thị danh sách (hoặc kết quả search)
+    auto showPlaces = [&](const wxString& filter = "") {
+        resultsSizer->Clear(true); // Xóa nội dung cũ
 
-        wxFont nameFont = nameText->GetFont();
-        nameFont.SetWeight(wxFONTWEIGHT_BOLD);
-        nameText->SetFont(nameFont);
+        for (const auto& place : famousPlacesQ1) {
+            // Nếu có filter -> chỉ hiển thị kết quả phù hợp
+            if (!filter.IsEmpty()) {
+                if (place.first.Lower().Find(filter.Lower()) == wxNOT_FOUND &&
+                    place.second.Lower().Find(filter.Lower()) == wxNOT_FOUND) {
+                    continue; // bỏ qua nếu không match
+                }
+            }
 
-        wxFont addressFont = addressText->GetFont();
-        addressFont.SetStyle(wxFONTSTYLE_ITALIC);
-        addressText->SetFont(addressFont);
+            wxStaticText* nameText = new wxStaticText(scrolledWindow, wxID_ANY, place.first);
+            wxStaticText* addressText = new wxStaticText(scrolledWindow, wxID_ANY, place.second);
 
-        resultsSizer->Add(nameText, 0, wxEXPAND | wxBOTTOM, 5);
-        resultsSizer->Add(addressText, 0, wxEXPAND | wxBOTTOM, 5);
-        resultsSizer->Add(new wxStaticLine(scrolledWindow), 0, wxEXPAND | wxBOTTOM, 10);
-    }
+            // Định dạng font
+            wxFont nameFont = nameText->GetFont();
+            nameFont.SetWeight(wxFONTWEIGHT_BOLD);
+            nameText->SetFont(nameFont);
+
+            wxFont addrFont = addressText->GetFont();
+            addrFont.SetStyle(wxFONTSTYLE_ITALIC);
+            addressText->SetFont(addrFont);
+
+            resultsSizer->Add(nameText, 0, wxEXPAND | wxBOTTOM, 5);
+            resultsSizer->Add(addressText, 0, wxEXPAND | wxBOTTOM, 5);
+            resultsSizer->Add(new wxStaticLine(scrolledWindow), 0, wxEXPAND | wxBOTTOM, 10);
+        }
+
+        scrolledWindow->Layout();
+        };
+
+    // 👉 Lần đầu load: hiển thị toàn bộ danh sách
+    showPlaces();
+
+    // 👉 Bắt sự kiện Enter trong ô search
+    searchCtrl->Bind(wxEVT_TEXT_ENTER, [=](wxCommandEvent& e) {
+        wxString query = e.GetString();
+        showPlaces(query);
+        });
+
     scrolledWindow->SetSizer(resultsSizer);
     sidebarSizer->Add(scrolledWindow, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
 
