@@ -16,7 +16,7 @@ MapPanel::MapPanel(wxWindow* parent)
     // !!! QUAN TRỌNG: Hãy thay các con số này bằng tọa độ thật trên file MapQuan1.png của bạn
     m_routePointsGoc = {
         wxPoint(0, 207), wxPoint(227, 330), wxPoint(231, 337), wxPoint(359,402),
-		wxPoint(432, 324)
+        wxPoint(432, 324)
     };
     // --- KẾT THÚC PHẦN THÊM MỚI ---
 
@@ -100,9 +100,9 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 
     if (!routePointsVe.empty()) {
         dc.SetBrush(*wxGREEN_BRUSH);
-        dc.DrawCircle(routePointsVe.front(), 2); // Điểm bắt đầu
+        dc.DrawCircle(routePointsVe.front(), 4); // Điểm bắt đầu
         dc.SetBrush(*wxRED_BRUSH);
-        dc.DrawCircle(routePointsVe.back(), 2); // Điểm kết thúc
+        dc.DrawCircle(routePointsVe.back(), 4); // Điểm kết thúc
     }
 }
 

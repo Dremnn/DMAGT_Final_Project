@@ -3,101 +3,84 @@
 #include <wx/statline.h>
 
 SearchPanel::SearchPanel(wxWindow* parent)
-    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(300, -1)) // Cố định chiều rộng
+    : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(350, -1))
 {
     this->SetBackgroundColour(wxColour(255, 255, 255));
 
-    // Sizer chính cho sidebar: Sizer dọc
     wxBoxSizer* sidebarSizer = new wxBoxSizer(wxVERTICAL);
 
-    // ---- Phần 1: Thanh tìm kiếm ----
-    wxBoxSizer* searchSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxSearchCtrl* searchCtrl = new wxSearchCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-    wxBitmapButton* searchButton = new wxBitmapButton(this, wxID_ANY, wxBitmap("search.png", wxBITMAP_TYPE_PNG));
-    searchSizer->Add(searchCtrl, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
-    searchSizer->Add(searchButton, 0, wxALIGN_CENTER_VERTICAL, 0);
-    sidebarSizer->Add(searchSizer, 0, wxEXPAND | wxALL, 10);
+    // --- PHẦN TÌM KIẾM ĐÃ ĐƯỢC THIẾT KẾ LẠI ---
 
-    // ---- Phần 2: Các nút chức năng ----
-    wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-    buttonSizer->Add(new wxBitmapButton(this, wxID_ANY, wxBitmap("directions.png", wxBITMAP_TYPE_PNG)), 1, wxEXPAND | wxRIGHT, 5);
-    buttonSizer->Add(new wxBitmapButton(this, wxID_ANY, wxBitmap("nearby.png", wxBITMAP_TYPE_PNG)), 1, wxEXPAND | wxRIGHT, 5);
-    buttonSizer->Add(new wxBitmapButton(this, wxID_ANY, wxBitmap("save.png", wxBITMAP_TYPE_PNG)), 1, wxEXPAND, 0);
-    sidebarSizer->Add(buttonSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    // 1. Sizer chính (ngang) để chứa cụm ô nhập và nút search
+    wxBoxSizer* mainSearchSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    // ---- Đường kẻ ngang phân cách ----
+    // 2. Sizer dọc, chỉ để chứa 2 ô nhập liệu
+    wxBoxSizer* inputBoxSizer = new wxBoxSizer(wxVERTICAL);
+
+    // Ô nhập điểm đi (Start)
+    wxTextCtrl* startPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+    startPointCtrl->SetHint(_T("Nhập điểm đi của bạn"));
+
+    // Ô nhập điểm đến (End)
+    wxTextCtrl* endPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+    endPointCtrl->SetHint(_T("Nhập điểm đến"));
+
+    // Thêm 2 ô nhập vào sizer dọc của chúng
+    // Dùng proportion = 1 để chúng có chiều cao bằng nhau và lấp đầy không gian
+    inputBoxSizer->Add(startPointCtrl, 1, wxEXPAND | wxBOTTOM, 5);
+    inputBoxSizer->Add(endPointCtrl, 1, wxEXPAND, 0);
+
+    // 3. Nút tìm kiếm bằng icon
+    wxBitmapButton* searchButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(_T("search.png"), wxBITMAP_TYPE_PNG));
+
+    // 4. Thêm sizer chứa ô nhập và nút search vào sizer chính
+    // Cho cụm ô nhập co giãn theo chiều rộng
+    mainSearchSizer->Add(inputBoxSizer, 1, wxEXPAND | wxRIGHT, 10);
+    // Căn nút search vào giữa theo chiều dọc
+    mainSearchSizer->Add(searchButton, 0, wxALIGN_CENTER_VERTICAL);
+
+    sidebarSizer->Add(mainSearchSizer, 0, wxEXPAND | wxALL, 10);
+
+    // --- KẾT THÚC PHẦN THAY ĐỔI ---
+
+    // Các phần còn lại của sidebar giữ nguyên
     sidebarSizer->Add(new wxStaticLine(this), 0, wxEXPAND | wxALL, 10);
 
-    // ---- Phần 3: Khu vực kết quả (có thể cuộn) ----
-    wxStaticText* resultsTitle = new wxStaticText(this, wxID_ANY, "Recent Places");
+    wxStaticText* resultsTitle = new wxStaticText(this, wxID_ANY, _T("Saved Places"));
     wxFont font = resultsTitle->GetFont();
     font.SetPointSize(12);
     font.SetWeight(wxFONTWEIGHT_BOLD);
     resultsTitle->SetFont(font);
-    sidebarSizer->Add(resultsTitle, 0, wxLEFT | wxRIGHT, 10);
+    sidebarSizer->Add(resultsTitle, 0, wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
     wxScrolledWindow* scrolledWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
-    scrolledWindow->SetScrollRate(0, 5); // Tốc độ cuộn
+    scrolledWindow->SetScrollRate(0, 5);
 
     wxBoxSizer* resultsSizer = new wxBoxSizer(wxVERTICAL);
-    // Danh sách cố định các địa danh nổi tiếng ở Quận 1
-    static const std::vector<std::pair<wxString, wxString>> famousPlacesQ1 = {
-        { "Dinh Độc Lập", "135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1" },
-        { "Nhà Thờ Đức Bà", "01 Công Xã Paris, Bến Nghé, Quận 1" },
-        { "Bưu Điện Trung Tâm", "02 Công Xã Paris, Bến Nghé, Quận 1" },
-        { "Chợ Bến Thành", "Lê Lợi, Bến Thành, Quận 1" },
-        { "Phố đi bộ Nguyễn Huệ", "Nguyễn Huệ, Bến Nghé, Quận 1" },
-        { "Bitexco Financial Tower", "02 Hải Triều, Bến Nghé, Quận 1" },
-        { "Nhà hát Thành Phố", "07 Công Trường Lam Sơn, Bến Nghé, Quận 1" },
-        { "Công viên 23/9", "Phạm Ngũ Lão, Quận 1" },
-        { "Bảo tàng Mỹ thuật", "97 Phó Đức Chính, Nguyễn Thái Bình, Quận 1" }
+
+    std::vector<std::pair<wxString, wxString>> savedPlaces = {
+        {_T("Dinh Thống Nhất"), _T("135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1")},
+        {_T("Nhà Thờ Đức Bà"), _T("01 Công Xã Paris, Bến Nghé, Quận 1")},
+        {_T("Bưu Điện Trung Tâm"), _T("02 Công Xã Paris, Bến Nghé, Quận 1")},
+        {_T("Chợ Bến Thành"), _T("Đ. Lê Lợi, Bến Thành, Quận 1")},
+        {_T("Phố Đi Bộ Nguyễn Huệ"), _T("Nguyễn Huệ, Bến Nghé, Quận 1")},
+        {_T("Bitexco Financial Tower"), _T("02 Hải Triều, Bến Nghé, Quận 1")}
     };
 
-    // 👉 Hàm tiện ích để hiển thị danh sách (hoặc kết quả search)
-    auto showPlaces = [&](const wxString& filter = "") {
-        resultsSizer->Clear(true); // Xóa nội dung cũ
+    for (const auto& place : savedPlaces) {
+        wxStaticText* nameText = new wxStaticText(scrolledWindow, wxID_ANY, place.first);
+        wxStaticText* addressText = new wxStaticText(scrolledWindow, wxID_ANY, place.second);
 
-        for (const auto& place : famousPlacesQ1) {
-            // Nếu có filter -> chỉ hiển thị kết quả phù hợp
-            if (!filter.IsEmpty()) {
-                if (place.first.Lower().Find(filter.Lower()) == wxNOT_FOUND &&
-                    place.second.Lower().Find(filter.Lower()) == wxNOT_FOUND) {
-                    continue; // bỏ qua nếu không match
-                }
-            }
+        wxFont nameFont = nameText->GetFont();
+        nameFont.SetWeight(wxFONTWEIGHT_BOLD);
+        nameText->SetFont(nameFont);
 
-            wxStaticText* nameText = new wxStaticText(scrolledWindow, wxID_ANY, place.first);
-            wxStaticText* addressText = new wxStaticText(scrolledWindow, wxID_ANY, place.second);
-
-            // Định dạng font
-            wxFont nameFont = nameText->GetFont();
-            nameFont.SetWeight(wxFONTWEIGHT_BOLD);
-            nameText->SetFont(nameFont);
-
-            wxFont addrFont = addressText->GetFont();
-            addrFont.SetStyle(wxFONTSTYLE_ITALIC);
-            addressText->SetFont(addrFont);
-
-            resultsSizer->Add(nameText, 0, wxEXPAND | wxBOTTOM, 5);
-            resultsSizer->Add(addressText, 0, wxEXPAND | wxBOTTOM, 5);
-            resultsSizer->Add(new wxStaticLine(scrolledWindow), 0, wxEXPAND | wxBOTTOM, 10);
-        }
-
-        scrolledWindow->Layout();
-        };
-
-    // 👉 Lần đầu load: hiển thị toàn bộ danh sách
-    showPlaces();
-
-    // 👉 Bắt sự kiện Enter trong ô search
-    searchCtrl->Bind(wxEVT_TEXT_ENTER, [=](wxCommandEvent& e) {
-        wxString query = e.GetString();
-        showPlaces(query);
-        });
-
+        resultsSizer->Add(nameText, 0, wxEXPAND | wxBOTTOM, 2);
+        resultsSizer->Add(addressText, 0, wxEXPAND | wxBOTTOM, 8);
+        resultsSizer->Add(new wxStaticLine(scrolledWindow), 0, wxEXPAND | wxBOTTOM, 8);
+    }
     scrolledWindow->SetSizer(resultsSizer);
     sidebarSizer->Add(scrolledWindow, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
-
 
     this->SetSizer(sidebarSizer);
 }
