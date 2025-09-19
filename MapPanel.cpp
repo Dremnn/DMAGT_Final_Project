@@ -11,17 +11,27 @@ MapPanel::MapPanel(wxWindow* parent)
         wxLogError("Không thể tải ảnh MapQuan1.png");
     }
 
-    // Liên kết các sự kiện chuột với các hàm xử lý
+    // --- PHẦN THÊM MỚI ---
+    // Khởi tạo dữ liệu tọa độ gốc cho đường đi
+    // !!! QUAN TRỌNG: Hãy thay các con số này bằng tọa độ thật trên file MapQuan1.png của bạn
+    m_routePointsGoc = {
+        wxPoint(0, 207), wxPoint(227, 330), wxPoint(231, 337), wxPoint(359,402),
+		wxPoint(432, 324)
+    };
+    // --- KẾT THÚC PHẦN THÊM MỚI ---
+
+    // Liên kết các sự kiện chuột với các hàm xử lý (giữ nguyên)
     Bind(wxEVT_PAINT, &MapPanel::OnPaint, this);
     Bind(wxEVT_MOUSEWHEEL, &MapPanel::OnMouseWheel, this);
     Bind(wxEVT_LEFT_DOWN, &MapPanel::OnLeftDown, this);
     Bind(wxEVT_MOTION, &MapPanel::OnMouseMove, this);
     Bind(wxEVT_LEFT_UP, &MapPanel::OnLeftUp, this);
 
-    // Lần đầu tiên, cập nhật bitmap đã co giãn
+    // Cập nhật bitmap đã co giãn lần đầu (giữ nguyên)
     UpdateScaledBitmap();
 }
 
+// Hàm UpdateScaledBitmap giữ nguyên
 void MapPanel::UpdateScaledBitmap()
 {
     if (!m_mapBitmap.IsOk()) return;
@@ -34,19 +44,16 @@ void MapPanel::UpdateScaledBitmap()
     wxImage scaledImage = originalImage.Scale(scaledWidth, scaledHeight, wxIMAGE_QUALITY_HIGH);
 
     m_scaledBitmap = wxBitmap(scaledImage);
-
-    // Sau khi thay đổi tỉ lệ, cần clamp lại offset để đảm bảo nằm trong giới hạn
     ClampOffset();
 }
 
+// Hàm ClampOffset giữ nguyên
 void MapPanel::ClampOffset()
 {
     if (!m_scaledBitmap.IsOk()) return;
-
     wxSize panelSize = GetSize();
     wxSize scaledSize = m_scaledBitmap.GetSize();
 
-    // Giới hạn cho trục X
     if (scaledSize.GetWidth() > panelSize.GetWidth()) {
         int minX = panelSize.GetWidth() - scaledSize.GetWidth();
         if (m_offset.x > 0) m_offset.x = 0;
@@ -56,7 +63,6 @@ void MapPanel::ClampOffset()
         m_offset.x = (panelSize.GetWidth() - scaledSize.GetWidth()) / 2;
     }
 
-    // Giới hạn cho trục Y
     if (scaledSize.GetHeight() > panelSize.GetHeight()) {
         int minY = panelSize.GetHeight() - scaledSize.GetHeight();
         if (m_offset.y > 0) m_offset.y = 0;
@@ -67,6 +73,7 @@ void MapPanel::ClampOffset()
     }
 }
 
+// ---- HÀM OnPaint ĐƯỢC CẬP NHẬT ----
 void MapPanel::OnPaint(wxPaintEvent& event)
 {
     wxBufferedPaintDC dc(this);
@@ -74,9 +81,32 @@ void MapPanel::OnPaint(wxPaintEvent& event)
 
     if (!m_scaledBitmap.IsOk()) return;
 
+    // 1. Vẽ bản đồ nền đã được zoom/pan
     dc.DrawBitmap(m_scaledBitmap, m_offset.x, m_offset.y, false);
+
+    // 2. Biến đổi tọa độ các điểm trên đường đi dựa trên scale và offset hiện tại
+    std::vector<wxPoint> routePointsVe;
+    for (const auto& ptGoc : m_routePointsGoc) {
+        int x_moi = (ptGoc.x * m_scale) + m_offset.x;
+        int y_moi = (ptGoc.y * m_scale) + m_offset.y;
+        routePointsVe.push_back(wxPoint(x_moi, y_moi));
+    }
+
+    // 3. Vẽ đường đi và các dấu chấm lên trên bản đồ
+    if (routePointsVe.size() > 1) {
+        dc.SetPen(wxPen(*wxBLUE, 3, wxPENSTYLE_SOLID));
+        dc.DrawLines(routePointsVe.size(), routePointsVe.data());
+    }
+
+    if (!routePointsVe.empty()) {
+        dc.SetBrush(*wxGREEN_BRUSH);
+        dc.DrawCircle(routePointsVe.front(), 2); // Điểm bắt đầu
+        dc.SetBrush(*wxRED_BRUSH);
+        dc.DrawCircle(routePointsVe.back(), 2); // Điểm kết thúc
+    }
 }
 
+// Các hàm xử lý chuột còn lại giữ nguyên
 void MapPanel::OnMouseWheel(wxMouseEvent& event)
 {
     int rotation = event.GetWheelRotation();
@@ -84,25 +114,19 @@ void MapPanel::OnMouseWheel(wxMouseEvent& event)
     wxSize bitmapSize = m_mapBitmap.GetSize();
 
     if (rotation > 0) {
-        // Zoom In
         m_scale *= 1.1;
-        // Giới hạn tỉ lệ phóng to để tránh lãng phí tài nguyên
-        if (m_scale > 2.36) { // Giới hạn zoom in ở mức 2.36 lần
+        if (m_scale > 2.36) {
             m_scale = 2.36;
         }
     }
     else {
-        // Zoom Out
-        // Lấy kích thước ảnh hiện tại
         double currentImageWidth = bitmapSize.GetWidth() * m_scale;
         double currentImageHeight = bitmapSize.GetHeight() * m_scale;
 
-        // Chỉ cho phép zoom out nếu ảnh lớn hơn panel
         if (currentImageWidth > panelSize.GetWidth() || currentImageHeight > panelSize.GetHeight()) {
             m_scale /= 1.1;
         }
 
-        // Cố định tỉ lệ zoom để không nhỏ hơn mức full panel
         double minScaleX = (double)panelSize.x / bitmapSize.x;
         double minScaleY = (double)panelSize.y / bitmapSize.y;
         double minScale = std::min(minScaleX, minScaleY);
@@ -129,9 +153,7 @@ void MapPanel::OnMouseMove(wxMouseEvent& event)
         m_offset.x += (currentPos.x - m_dragStart.x);
         m_offset.y += (currentPos.y - m_dragStart.y);
         m_dragStart = currentPos;
-
         ClampOffset();
-
         Refresh();
     }
 }
