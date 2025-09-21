@@ -1,5 +1,6 @@
 ﻿#include "MapPanel.h"
 #include "FindShortestPath.h"
+#include "FindAllPaths.h"
 #include "NormalizeString.h"
 #include <wx/dcclient.h>
 #include <wx/graphics.h>
@@ -27,9 +28,8 @@ MapPanel::MapPanel(wxWindow* parent)
     // Tạo đồ thị từ các node
     CreateGraph();
 
-    // Gọi hàm Dijkstra từ file Pathfinding.cpp để tìm đường đi
     // Đường đi sẽ được lưu vào m_path
-    m_path = Dijkstra(6, 3, m_nodes, m_adajacentList);
+    //m_path = Dijkstra(3, 6, m_nodes, m_adajacentList);
 
     // Liên kết các sự kiện chuột với các hàm xử lý
     Bind(wxEVT_PAINT, &MapPanel::OnPaint, this);
@@ -42,7 +42,95 @@ MapPanel::MapPanel(wxWindow* parent)
     UpdateScaledBitmap();
 }
 
-// Cập nhật hàm FindNodeIndexByName
+void MapPanel::OnPaint(wxPaintEvent& event)
+{
+    wxBufferedPaintDC dc(this);
+    dc.Clear();
+
+    if (!m_scaledBitmap.IsOk()) return;
+
+    // 1. Vẽ bản đồ nền đã được zoom/pan
+    dc.DrawBitmap(m_scaledBitmap, m_offset.x, m_offset.y, false);
+
+    // 2. Vẽ tất cả đường đi với màu khác nhau (nếu có)
+    if (!m_allPaths.empty()) {
+        // Danh sách màu cho các đường đi
+        wxColor pathColors[] = {
+            wxColor(255, 0, 255),    // Magenta
+            wxColor(0, 255, 255),    // Cyan
+            wxColor(255, 165, 0),    // Orange
+            wxColor(128, 0, 128),    // Purple
+            wxColor(255, 192, 203),  // Pink
+            wxColor(0, 128, 0),      // Green
+            wxColor(165, 42, 42),    // Brown
+            wxColor(128, 128, 128),  // Gray
+            wxColor(255, 255, 0),    // Yellow
+            wxColor(255, 20, 147),   // Deep Pink
+            wxColor(0, 191, 255),    // Deep Sky Blue
+            wxColor(50, 205, 50)     // Lime Green
+        };
+
+        int colorIndex = 0;
+        for (const auto& simplePath : m_allPaths) {
+            wxColor color = pathColors[colorIndex % 12];
+            dc.SetPen(wxPen(color, 2, wxPENSTYLE_SOLID));
+
+            // Vẽ các cạnh của đường đi này
+            for (const auto& edge : simplePath.edges) {
+                wxPoint startNodePos = m_nodes[edge.first].pos;
+                wxPoint endNodePos = m_nodes[edge.second].pos;
+
+                wxPoint startPos = wxPoint(
+                    startNodePos.x * m_scale + m_offset.x,
+                    startNodePos.y * m_scale + m_offset.y
+                );
+                wxPoint endPos = wxPoint(
+                    endNodePos.x * m_scale + m_offset.x,
+                    endNodePos.y * m_scale + m_offset.y
+                );
+
+                dc.DrawLine(startPos, endPos);
+            }
+            colorIndex++;
+        }
+    }
+
+    // 3. Vẽ đường đi ngắn nhất (đè lên trên) với màu xanh dương đậm
+    dc.SetPen(wxPen(*wxBLUE, 4, wxPENSTYLE_SOLID));
+    for (const auto& edge : m_path) {
+        wxPoint startNodePos = m_nodes[edge.first].pos;
+        wxPoint endNodePos = m_nodes[edge.second].pos;
+
+        wxPoint startPos = wxPoint(
+            startNodePos.x * m_scale + m_offset.x,
+            startNodePos.y * m_scale + m_offset.y
+        );
+        wxPoint endPos = wxPoint(
+            endNodePos.x * m_scale + m_offset.x,
+            endNodePos.y * m_scale + m_offset.y
+        );
+
+        dc.DrawLine(startPos, endPos);
+    }
+
+    // Vẽ các node
+    if (m_showAllNodes) {
+        // Vẽ tất cả nodes
+        for (const auto& node : m_nodes) {
+            DrawSingleNode(dc, node);
+        }
+    }
+    else {
+        // Chỉ vẽ những node active
+        for (int nodeIndex : m_activeNodes) {
+            if (nodeIndex < static_cast<int>(m_nodes.size())) {
+                DrawSingleNode(dc, m_nodes[nodeIndex]);
+            }
+        }
+    }
+}
+
+// Các hàm để vẽ đường đi
 int MapPanel::FindNodeIndexByName(const wxString& name) const
 {
     wxString normalizedName = NormalizeString(name);
@@ -57,12 +145,44 @@ int MapPanel::FindNodeIndexByName(const wxString& name) const
     return -1;
 }
 
-// Định nghĩa hàm mới FindAndDrawNewPath
 void MapPanel::FindAndDrawNewPath(int startIndex, int endIndex)
 {
     // Tìm đường đi mới
     m_path = Dijkstra(startIndex, endIndex, m_nodes, m_adajacentList);
+    // Cập nhật danh sách active nodes
+    m_activeNodes.clear();
+    for (const auto& edge : m_path) {
+        m_activeNodes.insert(edge.first);
+        m_activeNodes.insert(edge.second);
+    }
     // Yêu cầu vẽ lại MapPanel
+    Refresh();
+}
+
+void MapPanel::FindAndDrawAllPaths(int startIndex, int endIndex)
+{
+    // Tìm tất cả đường đi
+    m_allPaths = FindAllPaths(startIndex, endIndex, m_nodes, m_adajacentList);
+
+    // Tìm đường đi ngắn nhất để vẽ đè lên
+    m_path = Dijkstra(startIndex, endIndex, m_nodes, m_adajacentList);
+
+    // Cập nhật danh sách active nodes (từ tất cả đường đi)
+    m_activeNodes.clear();
+    for (const auto& simplePath : m_allPaths) {
+        for (const auto& edge : simplePath.edges) {
+            m_activeNodes.insert(edge.first);
+            m_activeNodes.insert(edge.second);
+        }
+    }
+
+    // Thêm nodes từ đường ngắn nhất (đề phòng)
+    for (const auto& edge : m_path) {
+        m_activeNodes.insert(edge.first);
+        m_activeNodes.insert(edge.second);
+    }
+
+    // Yêu cầu vẽ lại
     Refresh();
 }
 
@@ -92,6 +212,33 @@ void MapPanel::CreateGraph() {
     m_adajacentList[6][5] = Distance(m_nodes[6].pos, m_nodes[5].pos);
 }
 
+void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
+{
+    wxPoint screenPos = wxPoint(
+        static_cast<int>(node.pos.x * m_scale + m_offset.x),
+        static_cast<int>(node.pos.y * m_scale + m_offset.y)
+    );
+
+    if (node.isBigNode) {
+        dc.SetBrush(*wxRED_BRUSH);
+        dc.DrawCircle(screenPos, 5);
+    }
+    else {
+        dc.SetBrush(*wxBLACK_BRUSH);
+        dc.DrawCircle(screenPos, 2);
+    }
+}
+
+void MapPanel::ClearAllPaths()
+{
+    m_path.clear();
+    m_allPaths.clear();
+    m_activeNodes.clear();
+    m_showAllNodes = false;
+    Refresh();
+}
+
+// Các hàm xử lý zoom/pan
 void MapPanel::UpdateScaledBitmap()
 {
     if (!m_mapBitmap.IsOk()) return;
@@ -129,49 +276,6 @@ void MapPanel::ClampOffset()
     }
     else {
         m_offset.y = (panelSize.GetHeight() - scaledSize.GetHeight()) / 2;
-    }
-}
-
-void MapPanel::OnPaint(wxPaintEvent& event)
-{
-    wxBufferedPaintDC dc(this);
-    dc.Clear();
-
-    if (!m_scaledBitmap.IsOk()) return;
-
-    // 1. Vẽ bản đồ nền đã được zoom/pan
-    dc.DrawBitmap(m_scaledBitmap, m_offset.x, m_offset.y, false);
-
-    // Vẽ đường đi
-    dc.SetPen(wxPen(*wxBLUE, 3, wxPENSTYLE_SOLID));
-    for (const auto& edge : m_path) {
-        wxPoint startNodePos = m_nodes[edge.first].pos;
-        wxPoint endNodePos = m_nodes[edge.second].pos;
-
-        wxPoint startPos = wxPoint(startNodePos.x * m_scale + m_offset.x, startNodePos.y * m_scale + m_offset.y);
-        wxPoint endPos = wxPoint(endNodePos.x * m_scale + m_offset.x, endNodePos.y * m_scale + m_offset.y);
-
-        dc.DrawLine(startPos, endPos);
-    }
-
-    // Vẽ các node
-    for (const auto& node : m_nodes) {
-        wxPoint screenPos = wxPoint(
-            node.pos.x * m_scale + m_offset.x,
-            node.pos.y * m_scale + m_offset.y
-        );
-
-        if (node.isBigNode) {
-            // Vẽ node lớn (địa danh)
-            dc.SetBrush(*wxRED_BRUSH);
-            dc.DrawCircle(screenPos, 5); // Bán kính lớn hơn
-
-        }
-        else {
-            // Vẽ node nhỏ (đổi hướng)
-            dc.SetBrush(*wxBLACK_BRUSH);
-            dc.DrawCircle(screenPos, 2); // Bán kính nhỏ hơn
-        }
     }
 }
 

@@ -17,4 +17,6 @@ private:
     MapPanel* m_mapPanel = nullptr; // Con trỏ tới MapPanel
 
     void OnSearchClicked(wxCommandEvent& event);
+    void OnShowAllPathsClicked(wxCommandEvent& event);
+    void OnClearClicked(wxCommandEvent& event);
 };
