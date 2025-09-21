@@ -27,6 +27,12 @@
     <ClInclude Include="MapPanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FindShortestPath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NormalizeString.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -39,6 +45,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MapPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FindShortestPath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NormalizeString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

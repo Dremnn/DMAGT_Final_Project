@@ -22,12 +22,16 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="MapPanel.h" />
+    <ClInclude Include="NormalizeString.h" />
+    <ClInclude Include="FindShortestPath.h" />
     <ClInclude Include="SearchPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="MapPanel.cpp" />
+    <ClCompile Include="NormalizeString.cpp" />
+    <ClCompile Include="FindShortestPath.cpp" />
     <ClCompile Include="SearchPanel.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -112,7 +116,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(WXWIN)\include\msvc;$(WXWIN)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>

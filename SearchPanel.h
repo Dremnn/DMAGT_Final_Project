@@ -1,9 +1,20 @@
 ﻿#pragma once
 #include <wx/wx.h>
-#include <wx/srchctrl.h> // Giữ lại hoặc xóa cũng được, nhưng để cho an toàn
+#include <wx/srchctrl.h>
+
+class MapPanel; // Forward declaration
 
 class SearchPanel : public wxPanel
 {
 public:
     SearchPanel(wxWindow* parent);
+    // Hàm này cho phép truyền con trỏ MapPanel vào
+    void SetMapPanel(MapPanel* mapPanel);
+
+private:
+    wxTextCtrl* m_startPointCtrl;
+    wxTextCtrl* m_endPointCtrl;
+    MapPanel* m_mapPanel = nullptr; // Con trỏ tới MapPanel
+
+    void OnSearchClicked(wxCommandEvent& event);
 };

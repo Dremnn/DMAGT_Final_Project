@@ -1,4 +1,5 @@
 ﻿#include "SearchPanel.h"
+#include "MapPanel.h"
 #include <wx/scrolwin.h>
 #include <wx/statline.h>
 
@@ -9,41 +10,29 @@ SearchPanel::SearchPanel(wxWindow* parent)
 
     wxBoxSizer* sidebarSizer = new wxBoxSizer(wxVERTICAL);
 
-    // --- PHẦN TÌM KIẾM ĐÃ ĐƯỢC THIẾT KẾ LẠI ---
-
     // 1. Sizer chính (ngang) để chứa cụm ô nhập và nút search
     wxBoxSizer* mainSearchSizer = new wxBoxSizer(wxHORIZONTAL);
 
     // 2. Sizer dọc, chỉ để chứa 2 ô nhập liệu
     wxBoxSizer* inputBoxSizer = new wxBoxSizer(wxVERTICAL);
 
-    // Ô nhập điểm đi (Start)
-    wxTextCtrl* startPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-    startPointCtrl->SetHint(_T("Nhập điểm đi của bạn"));
+    // Khởi tạo các biến thành viên để lưu trữ con trỏ đến các ô nhập liệu
+    m_startPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+    m_startPointCtrl->SetHint(_T("Nhập điểm đi của bạn"));
 
-    // Ô nhập điểm đến (End)
-    wxTextCtrl* endPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-    endPointCtrl->SetHint(_T("Nhập điểm đến"));
+    m_endPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+    m_endPointCtrl->SetHint(_T("Nhập điểm đến"));
 
-    // Thêm 2 ô nhập vào sizer dọc của chúng
-    // Dùng proportion = 1 để chúng có chiều cao bằng nhau và lấp đầy không gian
-    inputBoxSizer->Add(startPointCtrl, 1, wxEXPAND | wxBOTTOM, 5);
-    inputBoxSizer->Add(endPointCtrl, 1, wxEXPAND, 0);
+    inputBoxSizer->Add(m_startPointCtrl, 1, wxEXPAND | wxBOTTOM, 5);
+    inputBoxSizer->Add(m_endPointCtrl, 1, wxEXPAND, 0);
 
     // 3. Nút tìm kiếm bằng icon
     wxBitmapButton* searchButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(_T("search.png"), wxBITMAP_TYPE_PNG));
 
-    // 4. Thêm sizer chứa ô nhập và nút search vào sizer chính
-    // Cho cụm ô nhập co giãn theo chiều rộng
     mainSearchSizer->Add(inputBoxSizer, 1, wxEXPAND | wxRIGHT, 10);
-    // Căn nút search vào giữa theo chiều dọc
     mainSearchSizer->Add(searchButton, 0, wxALIGN_CENTER_VERTICAL);
 
     sidebarSizer->Add(mainSearchSizer, 0, wxEXPAND | wxALL, 10);
-
-    // --- KẾT THÚC PHẦN THAY ĐỔI ---
-
-    // Các phần còn lại của sidebar giữ nguyên
     sidebarSizer->Add(new wxStaticLine(this), 0, wxEXPAND | wxALL, 10);
 
     wxStaticText* resultsTitle = new wxStaticText(this, wxID_ANY, _T("Saved Places"));
@@ -83,4 +72,37 @@ SearchPanel::SearchPanel(wxWindow* parent)
     sidebarSizer->Add(scrolledWindow, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
 
     this->SetSizer(sidebarSizer);
+
+    // Binding the button event to the handler function
+    searchButton->Bind(wxEVT_BUTTON, &SearchPanel::OnSearchClicked, this);
+}
+
+// Hàm để gán con trỏ MapPanel
+void SearchPanel::SetMapPanel(MapPanel* mapPanel)
+{
+    m_mapPanel = mapPanel;
+}
+
+// Hàm xử lý khi người dùng nhấn nút tìm kiếm
+void SearchPanel::OnSearchClicked(wxCommandEvent& event)
+{
+    if (!m_mapPanel) {
+        wxLogError("Lỗi: MapPanel chưa được gán.");
+        return;
+    }
+
+    wxString startName = m_startPointCtrl->GetValue();
+    wxString endName = m_endPointCtrl->GetValue();
+
+    // Tìm chỉ số của các node dựa trên tên
+    int startIndex = m_mapPanel->FindNodeIndexByName(startName);
+    int endIndex = m_mapPanel->FindNodeIndexByName(endName);
+
+    if (startIndex == -1 || endIndex == -1) {
+        wxMessageBox(_T("Vui lòng nhập một hoặc cả hai địa điểm không hợp lệ. Chỉ chấp nhận các địa điểm lớn."));
+        return;
+    }
+
+    // Gọi hàm trong MapPanel để tìm và vẽ đường đi mới
+    m_mapPanel->FindAndDrawNewPath(startIndex, endIndex);
 }
