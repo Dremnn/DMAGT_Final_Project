@@ -1,5 +1,6 @@
 ﻿#include "SearchPanel.h"
 #include "MapPanel.h"
+#include "ModernColors.h"
 #include <wx/scrolwin.h>
 #include <wx/statline.h>
 #include <wx/msgdlg.h>
@@ -31,6 +32,13 @@ SearchPanel::SearchPanel(wxWindow* parent)
 
     // Tạo nút tìm kiếm
     wxBitmapButton* searchButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(_T("search.png"), wxBITMAP_TYPE_PNG));
+
+    // Styling cho search button
+    searchButton->SetBackgroundColour(ModernColors::PRIMARY);
+    searchButton->SetMinSize(wxSize(50, 50));
+
+    // Tạo rounded corners bằng cách custom paint
+    searchButton->SetBackgroundStyle(wxBG_STYLE_PAINT);
 
     // Thêm các thành phần tìm kiếm vào mainSizer
     mainSearchSizer->Add(inputBoxSizer, 1, wxEXPAND | wxRIGHT, 10);

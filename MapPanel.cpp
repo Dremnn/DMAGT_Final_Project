@@ -2,6 +2,7 @@
 #include "FindShortestPath.h"
 #include "FindAllPaths.h"
 #include "NormalizeString.h"
+#include "ModernColors.h"
 #include <wx/dcclient.h>
 #include <wx/graphics.h>
 #include <wx/dcbuffer.h>
@@ -18,13 +19,16 @@ MapPanel::MapPanel(wxWindow* parent)
     }
 
     // Khởi tạo các node với loại node
-    m_nodes.push_back({ wxPoint(100, 100), true, _T("Dinh Độc Lập") }); // Node 0 
-    m_nodes.push_back({ wxPoint(300, 150), false, wxEmptyString }); // Node 1
-    m_nodes.push_back({ wxPoint(150, 300), false, wxEmptyString }); // Node 2
-    m_nodes.push_back({ wxPoint(400, 250), false, wxEmptyString }); // Node 3
-    m_nodes.push_back({ wxPoint(250, 450), false, wxEmptyString }); // Node 4
-    m_nodes.push_back({ wxPoint(500, 400), false, wxEmptyString }); // Node 5
-    m_nodes.push_back({ wxPoint(450, 600), true, _T("Nhà Thờ Đức Bà") }); // Node 6
+    m_nodes.push_back({ wxPoint(472, 327), true, _T("Dinh Độc Lập") }); // Node 0
+    //R1
+    m_nodes.push_back({ wxPoint(498, 301), false, wxEmptyString }); // Node 1
+    m_nodes.push_back({ wxPoint(507, 302), false, wxEmptyString }); // Node 2
+    //R2
+    m_nodes.push_back({ wxPoint(514, 366), false, wxEmptyString }); // Node 3
+    m_nodes.push_back({ wxPoint(527, 350), false, wxEmptyString }); // Node 4
+    m_nodes.push_back({ wxPoint(495, 320), false, wxEmptyString }); // Node 5
+    m_nodes.push_back({ wxPoint(509, 304), false, wxEmptyString }); // Node 6
+    m_nodes.push_back({ wxPoint(518, 313), true, _T("Nhà Thờ Đức Bà") }); // Node 7
 
     // Tạo đồ thị từ các node
     CreateGraph();
@@ -141,6 +145,22 @@ void MapPanel::OnPaint(wxPaintEvent& event)
     }
 }
 
+void MapPanel::OnPopupPaint(wxPaintEvent& event)
+{
+    wxAutoBufferedPaintDC dc(m_routeInfoPanel);
+    wxRect rect = m_routeInfoPanel->GetClientRect();
+
+    // Vẽ gradient từ trắng sang xám nhạt
+    dc.GradientFillLinear(rect,
+        wxColor(255, 255, 255),
+        wxColor(248, 249, 250),
+        wxSOUTH);
+
+    // Thêm border radius effect (dùng rounded rectangle)
+    dc.SetPen(wxPen(wxColor(230, 230, 230), 1));
+    dc.DrawRoundedRectangle(rect, 12);
+}
+
 // Các hàm để vẽ đường đi
 int MapPanel::FindNodeIndexByName(const wxString& name) const
 {
@@ -212,27 +232,17 @@ void MapPanel::FindAndDrawAllPaths(int startIndex, int endIndex)
 void MapPanel::CreateGraph() {
     m_adajacentList.clear();
 
-    // Các cạnh đã định nghĩa trước
+    // Dinh Độc Lập -> Nhà Thờ Đức Bà
+    //Route 1: Djikstra
     m_adajacentList[0][1] = Distance(m_nodes[0].pos, m_nodes[1].pos);
-    m_adajacentList[1][0] = Distance(m_nodes[1].pos, m_nodes[0].pos);
-
-    m_adajacentList[0][2] = Distance(m_nodes[0].pos, m_nodes[2].pos);
-    m_adajacentList[2][0] = Distance(m_nodes[2].pos, m_nodes[0].pos);
-
-    m_adajacentList[1][3] = Distance(m_nodes[1].pos, m_nodes[3].pos);
-    m_adajacentList[3][1] = Distance(m_nodes[3].pos, m_nodes[1].pos);
-
-    m_adajacentList[2][4] = Distance(m_nodes[2].pos, m_nodes[4].pos);
-    m_adajacentList[4][2] = Distance(m_nodes[4].pos, m_nodes[2].pos);
-
-    m_adajacentList[3][5] = Distance(m_nodes[3].pos, m_nodes[5].pos);
-    m_adajacentList[5][3] = Distance(m_nodes[5].pos, m_nodes[3].pos);
-
+    m_adajacentList[1][2] = Distance(m_nodes[1].pos, m_nodes[2].pos);
+    m_adajacentList[2][7] = Distance(m_nodes[2].pos, m_nodes[7].pos);
+    //Route 2:
+    m_adajacentList[0][3] = Distance(m_nodes[0].pos, m_nodes[3].pos);
+    m_adajacentList[3][4] = Distance(m_nodes[3].pos, m_nodes[4].pos);
     m_adajacentList[4][5] = Distance(m_nodes[4].pos, m_nodes[5].pos);
-    m_adajacentList[5][4] = Distance(m_nodes[5].pos, m_nodes[4].pos);
-
     m_adajacentList[5][6] = Distance(m_nodes[5].pos, m_nodes[6].pos);
-    m_adajacentList[6][5] = Distance(m_nodes[6].pos, m_nodes[5].pos);
+    m_adajacentList[6][7] = Distance(m_nodes[6].pos, m_nodes[7].pos);
 }
 
 void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
@@ -379,15 +389,32 @@ void MapPanel::CreateRouteInfoPanel()
     m_routeInfoPanel = new wxPanel(this, wxID_ANY);
     m_routeInfoPanel->SetBackgroundColour(wxColor(255, 255, 255));
 
+    // Thêm gradient background thay vì màu trắng đơn thuần
+    m_routeInfoPanel->SetBackgroundColour(ModernColors::SURFACE);
+
+    // Thêm shadow effect (có thể dùng border)
+    m_routeInfoPanel->SetBackgroundStyle(wxBG_STYLE_PAINT);
+
+    // Custom paint event để vẽ gradient
+    m_routeInfoPanel->Bind(wxEVT_PAINT, &MapPanel::OnPopupPaint, this);
+
     // Tạo sizer chính
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
     // Tạo nút toggle với mũi tên
     m_toggleButton = new wxButton(m_routeInfoPanel, wxID_ANY, wxT("▼ Thông tin lộ trình"),
         wxDefaultPosition, wxSize(-1, m_collapsedHeight));
-    m_toggleButton->SetBackgroundColour(wxColor(240, 240, 240));
+
+    m_toggleButton->SetBackgroundColour(ModernColors::PRIMARY);
+    m_toggleButton->SetForegroundColour(*wxWHITE);
+
     wxFont buttonFont = m_toggleButton->GetFont();
     buttonFont.SetWeight(wxFONTWEIGHT_BOLD);
+    buttonFont.SetPointSize(12);
+    m_toggleButton->SetFont(buttonFont);
+
+    m_toggleButton->SetMinSize(wxSize(-1, 45));
+
     m_toggleButton->SetFont(buttonFont);
     m_toggleButton->Bind(wxEVT_BUTTON, &MapPanel::OnTogglePopup, this);
 

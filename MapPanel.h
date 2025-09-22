@@ -7,6 +7,7 @@
 
 // Forward declarations
 struct SimplePath;
+struct ModernColors;
 
 using namespace std;
 
@@ -79,6 +80,7 @@ private:
 
     // Event handlers
     void OnPaint(wxPaintEvent& event);
+	void OnPopupPaint(wxPaintEvent& event);
 	void OnSize(wxSizeEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnLeftDown(wxMouseEvent& event);

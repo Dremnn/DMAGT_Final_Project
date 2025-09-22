@@ -2,7 +2,11 @@
 #include <wx/wx.h>
 #include <wx/srchctrl.h>
 
-class MapPanel; // Forward declaration
+// Forward declaration
+struct ModernColors;
+
+class MapPanel; 
+
 
 class SearchPanel : public wxPanel
 {

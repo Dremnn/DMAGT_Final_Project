@@ -23,6 +23,7 @@
     <ClInclude Include="FindAllPaths.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="MapPanel.h" />
+    <ClInclude Include="ModernColors.h" />
     <ClInclude Include="NormalizeString.h" />
     <ClInclude Include="FindShortestPath.h" />
     <ClInclude Include="SearchPanel.h" />
@@ -32,6 +33,7 @@
     <ClCompile Include="FindAllPaths.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="MapPanel.cpp" />
+    <ClCompile Include="ModernColors.cpp" />
     <ClCompile Include="NormalizeString.cpp" />
     <ClCompile Include="FindShortestPath.cpp" />
     <ClCompile Include="SearchPanel.cpp" />
