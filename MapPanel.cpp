@@ -232,17 +232,27 @@ void MapPanel::FindAndDrawAllPaths(int startIndex, int endIndex)
 void MapPanel::CreateGraph() {
     m_adajacentList.clear();
 
-    // Dinh Độc Lập -> Nhà Thờ Đức Bà
-    //Route 1: Djikstra
+    // Các cạnh đã định nghĩa trước
     m_adajacentList[0][1] = Distance(m_nodes[0].pos, m_nodes[1].pos);
-    m_adajacentList[1][2] = Distance(m_nodes[1].pos, m_nodes[2].pos);
-    m_adajacentList[2][7] = Distance(m_nodes[2].pos, m_nodes[7].pos);
-    //Route 2:
-    m_adajacentList[0][3] = Distance(m_nodes[0].pos, m_nodes[3].pos);
-    m_adajacentList[3][4] = Distance(m_nodes[3].pos, m_nodes[4].pos);
+    m_adajacentList[1][0] = Distance(m_nodes[1].pos, m_nodes[0].pos);
+
+    m_adajacentList[0][2] = Distance(m_nodes[0].pos, m_nodes[2].pos);
+    m_adajacentList[2][0] = Distance(m_nodes[2].pos, m_nodes[0].pos);
+
+    m_adajacentList[1][3] = Distance(m_nodes[1].pos, m_nodes[3].pos);
+    m_adajacentList[3][1] = Distance(m_nodes[3].pos, m_nodes[1].pos);
+
+    m_adajacentList[2][4] = Distance(m_nodes[2].pos, m_nodes[4].pos);
+    m_adajacentList[4][2] = Distance(m_nodes[4].pos, m_nodes[2].pos);
+
+    m_adajacentList[3][5] = Distance(m_nodes[3].pos, m_nodes[5].pos);
+    m_adajacentList[5][3] = Distance(m_nodes[5].pos, m_nodes[3].pos);
+
     m_adajacentList[4][5] = Distance(m_nodes[4].pos, m_nodes[5].pos);
+    m_adajacentList[5][4] = Distance(m_nodes[5].pos, m_nodes[4].pos);
+
     m_adajacentList[5][6] = Distance(m_nodes[5].pos, m_nodes[6].pos);
-    m_adajacentList[6][7] = Distance(m_nodes[6].pos, m_nodes[7].pos);
+    m_adajacentList[6][5] = Distance(m_nodes[6].pos, m_nodes[5].pos);
 }
 
 void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
@@ -335,7 +345,7 @@ void MapPanel::OnMouseWheel(wxMouseEvent& event)
     // Giới hạn scale
     wxSize panelSize = GetSize();
     wxSize bitmapSize = m_mapBitmap.GetSize();
-    if (m_scale > 2.36) m_scale = 2.36;
+    if (m_scale > 3.36) m_scale = 3.36;
 
     double minScale = std::min(static_cast<double>(panelSize.x) / bitmapSize.x,
         static_cast<double>(panelSize.y) / bitmapSize.y);
