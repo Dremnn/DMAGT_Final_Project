@@ -5,6 +5,7 @@
 #include <wx/dcclient.h>
 #include <wx/graphics.h>
 #include <wx/dcbuffer.h>
+#include <wx/statline.h>
 
 using namespace std;
 
@@ -17,7 +18,7 @@ MapPanel::MapPanel(wxWindow* parent)
     }
 
     // Khởi tạo các node với loại node
-    m_nodes.push_back({ wxPoint(100, 100), true, _T("Dinh Thống Nhất") }); // Node 0 
+    m_nodes.push_back({ wxPoint(100, 100), true, _T("Dinh Độc Lập") }); // Node 0 
     m_nodes.push_back({ wxPoint(300, 150), false, wxEmptyString }); // Node 1
     m_nodes.push_back({ wxPoint(150, 300), false, wxEmptyString }); // Node 2
     m_nodes.push_back({ wxPoint(400, 250), false, wxEmptyString }); // Node 3
@@ -30,6 +31,16 @@ MapPanel::MapPanel(wxWindow* parent)
 
     // Đường đi sẽ được lưu vào m_path
     //m_path = Dijkstra(3, 6, m_nodes, m_adajacentList);
+
+    // Khởi tạo slide timer cho popup
+    m_slideTimer = new wxTimer(this, wxID_ANY);
+    Bind(wxEVT_TIMER, &MapPanel::OnSlideTimer, this);
+
+    // Tạo route info panel
+    CreateRouteInfoPanel();
+
+    // Bind resize event
+    Bind(wxEVT_SIZE, &MapPanel::OnSize, this);
 
     // Liên kết các sự kiện chuột với các hàm xử lý
     Bind(wxEVT_PAINT, &MapPanel::OnPaint, this);
@@ -147,15 +158,27 @@ int MapPanel::FindNodeIndexByName(const wxString& name) const
 
 void MapPanel::FindAndDrawNewPath(int startIndex, int endIndex)
 {
-    // Tìm đường đi mới
     m_path = Dijkstra(startIndex, endIndex, m_nodes, m_adajacentList);
-    // Cập nhật danh sách active nodes
+
+    // Tính khoảng cách
+    double pathLength = 0.0;
+    for (const auto& edge : m_path) {
+        wxPoint p1 = m_nodes[edge.first].pos;
+        wxPoint p2 = m_nodes[edge.second].pos;
+        double pixelDist = std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
+        pathLength += pixelDist * 6.565; // meters
+    }
+
+    // Hiển thị popup với thông tin
+    ShowRouteInfo(pathLength);
+
+    // Cập nhật active nodes
     m_activeNodes.clear();
     for (const auto& edge : m_path) {
         m_activeNodes.insert(edge.first);
         m_activeNodes.insert(edge.second);
     }
-    // Yêu cầu vẽ lại MapPanel
+
     Refresh();
 }
 
@@ -235,6 +258,7 @@ void MapPanel::ClearAllPaths()
     m_allPaths.clear();
     m_activeNodes.clear();
     m_showAllNodes = false;
+	HideRouteInfo();
     Refresh();
 }
 
@@ -243,9 +267,17 @@ void MapPanel::UpdateScaledBitmap()
 {
     if (!m_mapBitmap.IsOk()) return;
 
+    // Chỉ update khi thay đổi đáng kể
+    static double lastScale = 0.0;
+    if (std::abs(m_scale - lastScale) < 0.01 && m_scaledBitmap.IsOk()) {
+        ClampOffset();
+        return;
+    }
+    lastScale = m_scale;
+
     wxSize originalSize = m_mapBitmap.GetSize();
-    int scaledWidth = originalSize.GetWidth() * m_scale;
-    int scaledHeight = originalSize.GetHeight() * m_scale;
+    int scaledWidth = static_cast<int>(originalSize.GetWidth() * m_scale);
+    int scaledHeight = static_cast<int>(originalSize.GetHeight() * m_scale);
 
     wxImage originalImage = m_mapBitmap.ConvertToImage();
     wxImage scaledImage = originalImage.Scale(scaledWidth, scaledHeight, wxIMAGE_QUALITY_HIGH);
@@ -283,28 +315,31 @@ void MapPanel::ClampOffset()
 void MapPanel::OnMouseWheel(wxMouseEvent& event)
 {
     int rotation = event.GetWheelRotation();
+    wxPoint mousePos = event.GetPosition();
+    double oldScale = m_scale;
+
+    // Zoom factor nhỏ để mượt hơn
+    double zoomFactor = rotation > 0 ? 1.08 : 0.926;  // 1/1.08 ≈ 0.926
+    m_scale *= zoomFactor;
+
+    // Giới hạn scale
     wxSize panelSize = GetSize();
     wxSize bitmapSize = m_mapBitmap.GetSize();
+    if (m_scale > 2.36) m_scale = 2.36;
 
-    if (rotation > 0) {
-        m_scale *= 1.1;
-        if (m_scale > 2.36) {
-            m_scale = 2.36;
-        }
-    }
-    else {
-        double currentImageWidth = bitmapSize.GetWidth() * m_scale;
-        double currentImageHeight = bitmapSize.GetHeight() * m_scale;
-        if (currentImageWidth > panelSize.GetWidth() || currentImageHeight > panelSize.GetHeight()) {
-            m_scale /= 1.1;
-        }
-        double minScaleX = (double)panelSize.x / bitmapSize.x;
-        double minScaleY = (double)panelSize.y / bitmapSize.y;
-        double minScale = std::min(minScaleX, minScaleY);
-        if (m_scale < minScale) {
-            m_scale = minScale;
-        }
-    }
+    double minScale = std::min(static_cast<double>(panelSize.x) / bitmapSize.x,
+        static_cast<double>(panelSize.y) / bitmapSize.y);
+    if (m_scale < minScale) m_scale = minScale;
+
+    // Zoom tại điểm chuột
+    wxPoint worldPos = wxPoint(
+        static_cast<int>((mousePos.x - m_offset.x) / oldScale),
+        static_cast<int>((mousePos.y - m_offset.y) / oldScale)
+    );
+
+    m_offset.x = mousePos.x - worldPos.x * m_scale;
+    m_offset.y = mousePos.y - worldPos.y * m_scale;
+
     UpdateScaledBitmap();
     Refresh();
 }
@@ -334,4 +369,265 @@ void MapPanel::OnLeftUp(wxMouseEvent& event)
     if (HasCapture()) {
         ReleaseMouse();
     }
+}
+
+
+// Thay thế phương thức CreateRouteInfoPanel() trong MapPanel.cpp
+
+void MapPanel::CreateRouteInfoPanel()
+{
+    m_routeInfoPanel = new wxPanel(this, wxID_ANY);
+    m_routeInfoPanel->SetBackgroundColour(wxColor(255, 255, 255));
+
+    // Tạo sizer chính
+    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+
+    // Tạo nút toggle với mũi tên
+    m_toggleButton = new wxButton(m_routeInfoPanel, wxID_ANY, wxT("▼ Thông tin lộ trình"),
+        wxDefaultPosition, wxSize(-1, m_collapsedHeight));
+    m_toggleButton->SetBackgroundColour(wxColor(240, 240, 240));
+    wxFont buttonFont = m_toggleButton->GetFont();
+    buttonFont.SetWeight(wxFONTWEIGHT_BOLD);
+    m_toggleButton->SetFont(buttonFont);
+    m_toggleButton->Bind(wxEVT_BUTTON, &MapPanel::OnTogglePopup, this);
+
+    // Panel chứa nội dung chi tiết
+    m_routeContentPanel = new wxPanel(m_routeInfoPanel, wxID_ANY);
+    m_routeContentPanel->SetBackgroundColour(wxColor(255, 255, 255));
+
+    // Tạo sizer cho nội dung
+    wxBoxSizer* contentSizer = new wxBoxSizer(wxHORIZONTAL);
+
+    // Cột 1: Khoảng cách
+    wxBoxSizer* col1Sizer = new wxBoxSizer(wxVERTICAL);
+    wxStaticText* distTitle = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("Khoảng cách"));
+    distTitle->SetForegroundColour(wxColor(128, 128, 128));
+    m_distanceLabel = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("0 km"));
+    wxFont distFont = m_distanceLabel->GetFont();
+    distFont.SetWeight(wxFONTWEIGHT_BOLD);
+    distFont.SetPointSize(14);
+    m_distanceLabel->SetFont(distFont);
+    m_distanceLabel->SetForegroundColour(wxColor(0, 120, 215));
+
+    col1Sizer->Add(distTitle, 0, wxBOTTOM, 2);
+    col1Sizer->Add(m_distanceLabel, 0, 0, 0);
+
+    // Cột 2: Giá Grab
+    wxBoxSizer* col2Sizer = new wxBoxSizer(wxVERTICAL);
+    wxStaticText* priceTitle = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("Giá Grab"));
+    priceTitle->SetForegroundColour(wxColor(128, 128, 128));
+    m_grabPriceLabel = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("0 VNĐ"));
+    wxFont priceFont = m_grabPriceLabel->GetFont();
+    priceFont.SetWeight(wxFONTWEIGHT_BOLD);
+    priceFont.SetPointSize(14);
+    m_grabPriceLabel->SetFont(priceFont);
+    m_grabPriceLabel->SetForegroundColour(wxColor(0, 150, 0));
+
+    col2Sizer->Add(priceTitle, 0, wxBOTTOM, 2);
+    col2Sizer->Add(m_grabPriceLabel, 0, 0, 0);
+
+    // Cột 3: Thời gian (ước tính)
+    wxBoxSizer* col3Sizer = new wxBoxSizer(wxVERTICAL);
+    wxStaticText* timeTitle = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("Thời gian"));
+    timeTitle->SetForegroundColour(wxColor(128, 128, 128));
+    m_timeLabel = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("0 phút"));
+    wxFont timeFont = m_timeLabel->GetFont();
+    timeFont.SetWeight(wxFONTWEIGHT_BOLD);
+    timeFont.SetPointSize(14);
+    m_timeLabel->SetFont(timeFont);
+    m_timeLabel->SetForegroundColour(wxColor(255, 140, 0));
+
+    col3Sizer->Add(timeTitle, 0, wxBOTTOM, 2);
+    col3Sizer->Add(m_timeLabel, 0, 0, 0);
+
+    contentSizer->Add(col1Sizer, 1, wxALL, 15);
+    contentSizer->Add(col2Sizer, 1, wxTOP | wxBOTTOM | wxRIGHT, 15);
+    contentSizer->Add(col3Sizer, 1, wxTOP | wxBOTTOM | wxRIGHT, 15);
+
+    m_routeContentPanel->SetSizer(contentSizer);
+
+    // Thêm vào sizer chính
+    mainSizer->Add(m_toggleButton, 0, wxEXPAND);
+    mainSizer->Add(m_routeContentPanel, 1, wxEXPAND);
+
+    m_routeInfoPanel->SetSizer(mainSizer);
+
+    // Ẩn panel ban đầu
+    m_routeInfoPanel->Hide();
+    m_currentHeight = m_popupHeight; // Bắt đầu với trạng thái mở rộng
+    m_isExpanded = true;
+}
+
+// Hiển thị popup với thông tin mới
+void MapPanel::ShowRouteInfo(double distanceMeters)
+{
+    if (!m_routeInfoPanel) return;
+
+    // Tính toán thông tin
+    double distanceKm = distanceMeters / 1000.0;
+
+    // Giá Grab ước tính
+    double basePrice = 15000;
+    double pricePerKm = 12000;
+    double estimatedPrice = basePrice + (distanceKm * pricePerKm);
+
+    // Thời gian ước tính
+    double estimatedTimeMinutes = (distanceKm / 20.0) * 60.0;
+
+    // Cập nhật text
+    if (distanceKm >= 1.0) {
+        m_distanceLabel->SetLabel(wxString::Format(wxT("%.2f km"), distanceKm));
+    }
+    else {
+        m_distanceLabel->SetLabel(wxString::Format(wxT("%.0f m"), distanceMeters));
+    }
+
+    m_grabPriceLabel->SetLabel(wxString::Format(wxT("%.0f VNĐ"), estimatedPrice));
+    m_timeLabel->SetLabel(wxString::Format(wxT("%.0f phút"), estimatedTimeMinutes));
+
+    // Hiển thị popup ở trạng thái mở rộng
+    m_isExpanded = true;
+    m_currentHeight = m_popupHeight;
+    m_targetHeight = m_popupHeight;
+    UpdateToggleButtonText();
+
+    UpdateRouteInfoPosition();
+    m_routeInfoPanel->Show();
+    m_showRouteInfo = true;
+}
+
+// Ẩn popup hoàn toàn
+void MapPanel::HideRouteInfo()
+{
+    if (!m_showRouteInfo) return;
+
+    // Ẩn Panel
+    m_routeInfoPanel->Hide();
+    m_showRouteInfo = false;
+
+	// Dừng Timer nếu đang chạy
+    if (m_slideTimer && m_slideTimer->IsRunning()) {
+        m_slideTimer->Stop();
+    }
+
+	// Đặt lại trạng thái
+    m_isExpanded = false;
+    m_currentHeight = m_collapsedHeight;
+    m_targetHeight = m_collapsedHeight;
+}
+
+// Xử lý nút toggle
+void MapPanel::OnTogglePopup(wxCommandEvent& event)
+{
+    if (m_isExpanded) {
+        CollapsePopup();
+    }
+    else {
+        ExpandPopup();
+    }
+}
+
+// Mở rộng popup
+void MapPanel::ExpandPopup()
+{
+    m_isExpanded = true;
+    m_targetHeight = m_popupHeight;
+    UpdateToggleButtonText();
+
+    // Hiện content panel
+    m_routeContentPanel->Show();
+
+    // Bắt đầu animation
+    m_slideTimer->Start(16);
+}
+
+// Thu gọn popup
+void MapPanel::CollapsePopup()
+{
+    m_isExpanded = false;
+    m_targetHeight = m_collapsedHeight;
+    UpdateToggleButtonText();
+
+    // Bắt đầu animation
+    m_slideTimer->Start(16);
+}
+
+// Cập nhật text và mũi tên của nút toggle
+void MapPanel::UpdateToggleButtonText()
+{
+    if (m_toggleButton) {
+        if (m_isExpanded) {
+            m_toggleButton->SetLabel(wxT("▲ Thu gọn"));
+        }
+        else {
+            m_toggleButton->SetLabel(wxT("▼ Thông tin lộ trình"));
+        }
+    }
+}
+
+// Animation timer 
+void MapPanel::OnSlideTimer(wxTimerEvent& event)
+{
+    bool animationDone = false;
+
+    // Tính toán chiều cao mới
+    if (m_currentHeight < m_targetHeight) {
+        m_currentHeight += 6; // Tốc độ mở rộng
+        if (m_currentHeight >= m_targetHeight) {
+            m_currentHeight = m_targetHeight;
+            animationDone = true;
+        }
+    }
+    else if (m_currentHeight > m_targetHeight) {
+        m_currentHeight -= 6; // Tốc độ thu gọn
+        if (m_currentHeight <= m_targetHeight) {
+            m_currentHeight = m_targetHeight;
+            animationDone = true;
+        }
+    }
+    else {
+        animationDone = true;
+    }
+
+    // Cập nhật kích thước panel
+    UpdateRouteInfoPosition();
+
+    // Ẩn content panel sau khi thu gọn xong
+    if (animationDone) {
+        if (!m_isExpanded) {
+            m_routeContentPanel->Hide();
+        }
+        m_slideTimer->Stop();
+    }
+
+    // Refresh để vẽ lại
+    m_routeInfoPanel->Refresh();
+}
+
+// Cập nhật vị trí popup 
+void MapPanel::UpdateRouteInfoPosition()
+{
+    if (!m_routeInfoPanel) return;
+
+    wxSize panelSize = GetSize();
+    int panelWidth = 400;
+    int panelX = (panelSize.x - panelWidth) / 2;
+
+    // Vị trí Y cố định ở dưới màn hình
+    m_popupY = panelSize.y - m_currentHeight - 0; 
+
+    m_routeInfoPanel->SetSize(panelX, m_popupY, panelWidth, m_currentHeight);
+}
+
+// Xử lý resize event 
+void MapPanel::OnSize(wxSizeEvent& event)
+{
+    if (m_showRouteInfo) {
+        UpdateRouteInfoPosition();
+    }
+
+    // Cập nhật scaled bitmap khi resize
+    UpdateScaledBitmap();
+
+    event.Skip();
 }

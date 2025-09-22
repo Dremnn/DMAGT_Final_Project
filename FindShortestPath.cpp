@@ -3,7 +3,8 @@
 
 // Hàm tính khoảng cách Euclidean giữa hai điểm
 double Distance(const wxPoint& p1, const wxPoint& p2) {
-    return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
+    double pixelDistance = std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
+    return pixelDistance * 6.565; // Trả về khoảng cách thực tế tính bằng mét
 }
 
 // Thuật toán Dijkstra tìm đường đi ngắn nhất

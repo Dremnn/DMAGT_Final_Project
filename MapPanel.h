@@ -24,18 +24,37 @@ public:
     void FindAndDrawNewPath(int startIndex, int endIndex);
     void FindAndDrawAllPaths(int startIndex, int endIndex);
     void ClearAllPaths();
+    void HideRouteInfo();
 
 private:
     wxBitmap m_mapBitmap;
     wxBitmap m_scaledBitmap;
+
+	// Graph data
     vector<MapNode> m_nodes;
     vector<pair<int, int>> m_path;
     vector<SimplePath> m_allPaths;
     std::map<int, std::map<int, double>> m_adajacentList;
 
-    // Hiển thị nodes
+	// Display nodes
     bool m_showAllNodes = false;
     std::set<int> m_activeNodes;
+
+    // Route info popup
+    wxPanel* m_routeInfoPanel = nullptr;
+    wxPanel* m_routeContentPanel = nullptr;  // Panel chứa nội dung
+    wxButton* m_toggleButton = nullptr;      // Nút toggle với mũi tên
+    wxStaticText* m_distanceLabel = nullptr;
+    wxStaticText* m_grabPriceLabel = nullptr;
+    wxStaticText* m_timeLabel = nullptr;
+    bool m_showRouteInfo = false;
+    bool m_isExpanded = true;               // Trạng thái mở rộng/thu gọn
+    wxTimer* m_slideTimer = nullptr;
+    int m_popupHeight = 120;               // Chiều cao khi mở rộng
+    int m_collapsedHeight = 40;            // Chiều cao khi thu gọn (chỉ hiện nút)
+    int m_currentHeight = 0;               // Chiều cao hiện tại
+    int m_targetHeight = 0;                // Chiều cao mục tiêu
+    int m_popupY = 0;                      // Vị trí Y cố định của popup
 
     // View transformation
     double m_scale = 1.0;
@@ -48,9 +67,19 @@ private:
     void UpdateScaledBitmap();
     void ClampOffset();
     void DrawSingleNode(wxDC& dc, const MapNode& node);  // Sửa parameter
+    // Methods cho popup 
+    void CreateRouteInfoPanel();
+    void ShowRouteInfo(double distance);
+    void OnSlideTimer(wxTimerEvent& event);
+    void OnTogglePopup(wxCommandEvent& event);    // Thay thế OnClosePopup
+    void UpdateRouteInfoPosition();
+    void ExpandPopup();                           // Mở rộng popup
+    void CollapsePopup();                         // Thu gọn popup
+    void UpdateToggleButtonText();                // Cập nhật text nút toggle
 
     // Event handlers
     void OnPaint(wxPaintEvent& event);
+	void OnSize(wxSizeEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnLeftDown(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);

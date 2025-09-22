@@ -64,7 +64,7 @@ SearchPanel::SearchPanel(wxWindow* parent)
     // Sizer cho danh sách địa điểm
     wxBoxSizer* resultsSizer = new wxBoxSizer(wxVERTICAL);
     std::vector<std::pair<wxString, wxString>> savedPlaces = {
-        {_T("Dinh Thống Nhất"), _T("135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1")},
+        {_T("Dinh Độc Lập"), _T("135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1")},
         {_T("Nhà Thờ Đức Bà"), _T("01 Công Xã Paris, Bến Nghé, Quận 1")},
         {_T("Bưu Điện Trung Tâm"), _T("02 Công Xã Paris, Bến Nghé, Quận 1")},
         {_T("Chợ Bến Thành"), _T("Đ. Lê Lợi, Bến Thành, Quận 1")},
