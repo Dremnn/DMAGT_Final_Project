@@ -18,13 +18,16 @@ MapPanel::MapPanel(wxWindow* parent)
     }
 
     // Khởi tạo các node với loại node
-    m_nodes.push_back({ wxPoint(100, 100), true, _T("Dinh Độc Lập") }); // Node 0 
-    m_nodes.push_back({ wxPoint(300, 150), false, wxEmptyString }); // Node 1
-    m_nodes.push_back({ wxPoint(150, 300), false, wxEmptyString }); // Node 2
-    m_nodes.push_back({ wxPoint(400, 250), false, wxEmptyString }); // Node 3
-    m_nodes.push_back({ wxPoint(250, 450), false, wxEmptyString }); // Node 4
-    m_nodes.push_back({ wxPoint(500, 400), false, wxEmptyString }); // Node 5
-    m_nodes.push_back({ wxPoint(450, 600), true, _T("Nhà Thờ Đức Bà") }); // Node 6
+    m_nodes.push_back({ wxPoint(472, 327), true, _T("Dinh Độc Lập") }); // Node 0
+    //R1
+    m_nodes.push_back({ wxPoint(498, 301), false, wxEmptyString }); // Node 1
+    m_nodes.push_back({ wxPoint(507, 302), false, wxEmptyString }); // Node 2
+    //R2
+    m_nodes.push_back({ wxPoint(514, 366), false, wxEmptyString }); // Node 3
+    m_nodes.push_back({ wxPoint(527, 350), false, wxEmptyString }); // Node 4
+    m_nodes.push_back({ wxPoint(495, 320), false, wxEmptyString }); // Node 5
+    m_nodes.push_back({ wxPoint(509, 304), false, wxEmptyString }); // Node 6
+    m_nodes.push_back({ wxPoint(518, 313), true, _T("Nhà Thờ Đức Bà") }); // Node 7
 
     // Tạo đồ thị từ các node
     CreateGraph();
@@ -212,27 +215,17 @@ void MapPanel::FindAndDrawAllPaths(int startIndex, int endIndex)
 void MapPanel::CreateGraph() {
     m_adajacentList.clear();
 
-    // Các cạnh đã định nghĩa trước
+	// Dinh Độc Lập -> Nhà Thờ Đức Bà
+    //Route 1: Djikstra
     m_adajacentList[0][1] = Distance(m_nodes[0].pos, m_nodes[1].pos);
-    m_adajacentList[1][0] = Distance(m_nodes[1].pos, m_nodes[0].pos);
-
-    m_adajacentList[0][2] = Distance(m_nodes[0].pos, m_nodes[2].pos);
-    m_adajacentList[2][0] = Distance(m_nodes[2].pos, m_nodes[0].pos);
-
-    m_adajacentList[1][3] = Distance(m_nodes[1].pos, m_nodes[3].pos);
-    m_adajacentList[3][1] = Distance(m_nodes[3].pos, m_nodes[1].pos);
-
-    m_adajacentList[2][4] = Distance(m_nodes[2].pos, m_nodes[4].pos);
-    m_adajacentList[4][2] = Distance(m_nodes[4].pos, m_nodes[2].pos);
-
-    m_adajacentList[3][5] = Distance(m_nodes[3].pos, m_nodes[5].pos);
-    m_adajacentList[5][3] = Distance(m_nodes[5].pos, m_nodes[3].pos);
-
-    m_adajacentList[4][5] = Distance(m_nodes[4].pos, m_nodes[5].pos);
-    m_adajacentList[5][4] = Distance(m_nodes[5].pos, m_nodes[4].pos);
-
-    m_adajacentList[5][6] = Distance(m_nodes[5].pos, m_nodes[6].pos);
-    m_adajacentList[6][5] = Distance(m_nodes[6].pos, m_nodes[5].pos);
+    m_adajacentList[1][2] = Distance(m_nodes[1].pos, m_nodes[2].pos);
+    m_adajacentList[2][7] = Distance(m_nodes[2].pos, m_nodes[7].pos);
+	//Route 2:
+    m_adajacentList[0][3] = Distance(m_nodes[0].pos, m_nodes[3].pos);
+	m_adajacentList[3][4] = Distance(m_nodes[3].pos, m_nodes[4].pos);
+	m_adajacentList[4][5] = Distance(m_nodes[4].pos, m_nodes[5].pos);
+	m_adajacentList[5][6] = Distance(m_nodes[5].pos, m_nodes[6].pos);
+    m_adajacentList[6][7] = Distance(m_nodes[6].pos, m_nodes[7].pos);
 }
 
 void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
@@ -325,7 +318,7 @@ void MapPanel::OnMouseWheel(wxMouseEvent& event)
     // Giới hạn scale
     wxSize panelSize = GetSize();
     wxSize bitmapSize = m_mapBitmap.GetSize();
-    if (m_scale > 2.36) m_scale = 2.36;
+    if (m_scale > 3.36) m_scale = 3.36;
 
     double minScale = std::min(static_cast<double>(panelSize.x) / bitmapSize.x,
         static_cast<double>(panelSize.y) / bitmapSize.y);
