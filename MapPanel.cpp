@@ -20,14 +20,21 @@ MapPanel::MapPanel(wxWindow* parent)
     // Khởi tạo các node với loại node
     m_nodes.push_back({ wxPoint(472, 327), true, _T("Dinh Độc Lập") }); // Node 0
     //R1
-    m_nodes.push_back({ wxPoint(498, 301), false, wxEmptyString }); // Node 1
-    m_nodes.push_back({ wxPoint(507, 302), false, wxEmptyString }); // Node 2
-    //R2
-    m_nodes.push_back({ wxPoint(514, 366), false, wxEmptyString }); // Node 3
-    m_nodes.push_back({ wxPoint(527, 350), false, wxEmptyString }); // Node 4
-    m_nodes.push_back({ wxPoint(495, 320), false, wxEmptyString }); // Node 5
-    m_nodes.push_back({ wxPoint(509, 304), false, wxEmptyString }); // Node 6
-    m_nodes.push_back({ wxPoint(518, 313), true, _T("Nhà Thờ Đức Bà") }); // Node 7
+    //m_nodes.push_back({ wxPoint(498, 301), false, wxEmptyString }); // Node 1
+    //m_nodes.push_back({ wxPoint(507, 302), false, wxEmptyString }); // Node 2
+    ////R2
+    //m_nodes.push_back({ wxPoint(514, 366), false, wxEmptyString }); // Node 3
+    //m_nodes.push_back({ wxPoint(527, 350), false, wxEmptyString }); // Node 4
+    //m_nodes.push_back({ wxPoint(495, 320), false, wxEmptyString }); // Node 5 
+    //m_nodes.push_back({ wxPoint(509, 304), false, wxEmptyString }); // Node 6
+    m_nodes.push_back({ wxPoint(518, 313), true, _T("Nhà Thờ Đức Bà") }); // Node 1
+    m_nodes.push_back({ wxPoint(520, 302), true,_T("Bưu Điện Trung Tâm") }); // Node 2
+    m_nodes.push_back({ wxPoint(490, 424), true,_T("Chợ Bến Thành") }); // Node 3
+	m_nodes.push_back({ wxPoint(600, 425), true,_T("Bitexco Financial Tower") }); // Node 4
+	m_nodes.push_back({ wxPoint(560, 375), true,_T("Phố đi bộ Bùi Viện") }); // Node 5
+
+
+
 
     // Tạo đồ thị từ các node
     CreateGraph();
