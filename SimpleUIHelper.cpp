@@ -1,6 +1,7 @@
-#include "SimpleUIHelper.h"
+﻿#include "SimpleUIHelper.h"
 #include "ModernColors.h"  
 
+// Hàm áp dụng style cho wxButton
 void SimpleUIHelper::StyleButton(wxButton* button, bool isPrimary) {
     if (!button) return;
 
@@ -20,6 +21,7 @@ void SimpleUIHelper::StyleButton(wxButton* button, bool isPrimary) {
     button->SetMinSize(wxSize(-1, 36));
 }
 
+// Hàm áp dụng style cho wxTextCtrl
 void SimpleUIHelper::StyleTextCtrl(wxTextCtrl* textCtrl) {
     if (!textCtrl) return;
 
@@ -32,6 +34,7 @@ void SimpleUIHelper::StyleTextCtrl(wxTextCtrl* textCtrl) {
     textCtrl->SetMinSize(wxSize(-1, 36));
 }
 
+// Hàm áp dụng style cho wxPanel và các con của nó
 void SimpleUIHelper::StylePanel(wxPanel* panel) {
     if (!panel) return;
 

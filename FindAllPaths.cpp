@@ -3,14 +3,16 @@
 #include <algorithm>
 #include <set>
 
+using namespace std;
+
 // Hàm đệ quy để tìm tất cả đường đi
 void FindAllPathsRecursive(
     int currentNode,
     int endNode,
-    const std::map<int, std::map<int, double>>& graph,
-    std::vector<int>& currentPath,
-    std::set<int>& visited,
-    std::vector<std::vector<int>>& allPaths
+    const map<int, map<int, double>>& graph,
+    vector<int>& currentPath,
+    set<int>& visited,
+    vector<vector<int>>& allPaths
 ) {
     // Nếu đã đến đích
     if (currentNode == endNode) {
@@ -41,18 +43,18 @@ void FindAllPathsRecursive(
     }
 }
 
-std::vector<SimplePath> FindAllPaths(
+vector<SimplePath> FindAllPaths(
     int startNodeIndex,
     int endNodeIndex,
-    const std::vector<MapNode>& nodes,
-    const std::map<int, std::map<int, double>>& graph
+    const vector<MapNode>& nodes,
+    const map<int, map<int, double>>& graph
 ) {
-    std::vector<SimplePath> result;
+    vector<SimplePath> result;
 
     // Tìm tất cả đường đi
-    std::vector<std::vector<int>> allNodePaths;
-    std::vector<int> currentPath = { startNodeIndex };
-    std::set<int> visited = { startNodeIndex };
+    vector<vector<int>> allNodePaths;
+    vector<int> currentPath = { startNodeIndex };
+    set<int> visited = { startNodeIndex };
 
     FindAllPathsRecursive(
         startNodeIndex, endNodeIndex, graph,

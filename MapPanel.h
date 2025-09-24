@@ -35,11 +35,11 @@ private:
     vector<MapNode> m_nodes;
     vector<pair<int, int>> m_path;
     vector<SimplePath> m_allPaths;
-    std::map<int, std::map<int, double>> m_adajacentList;
+    map<int, map<int, double>> m_adajacentList;
 
 	// Display nodes
     bool m_showAllNodes = false;
-    std::set<int> m_activeNodes;
+    set<int> m_activeNodes;
 
     // Route info popup
     wxPanel* m_routeInfoPanel = nullptr;
@@ -68,7 +68,7 @@ private:
     void UpdateScaledBitmap();
     void ClampOffset();
     void DrawSingleNode(wxDC& dc, const MapNode& node);  // Sửa parameter
-    // Methods cho popup 
+	// Methods cho popup panel ( route info)
     void CreateRouteInfoPanel();
     void ShowRouteInfo(double distance);
     void OnSlideTimer(wxTimerEvent& event);

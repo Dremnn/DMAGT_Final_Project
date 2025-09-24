@@ -1,10 +1,12 @@
 ﻿#include "NormalizeString.h"
 
+using namespace std;
+
 wxString NormalizeString(const wxString& input){
     wxString result = input;
 
     // Sử dụng map để dễ quản lý, bao gồm cả chữ hoa và chữ thường
-    std::map<wxString, wxString> charMap = {
+    map<wxString, wxString> charMap = {
         {wxT("à"), wxT("a")}, {wxT("á"), wxT("a")}, {wxT("ạ"), wxT("a")}, {wxT("ả"), wxT("a")}, {wxT("ã"), wxT("a")},
         {wxT("â"), wxT("a")}, {wxT("ầ"), wxT("a")}, {wxT("ấ"), wxT("a")}, {wxT("ậ"), wxT("a")}, {wxT("ẩ"), wxT("a")}, {wxT("ẫ"), wxT("a")},
         {wxT("ă"), wxT("a")}, {wxT("ằ"), wxT("a")}, {wxT("ắ"), wxT("a")}, {wxT("ặ"), wxT("a")}, {wxT("ẳ"), wxT("a")}, {wxT("ẵ"), wxT("a")},

@@ -5,7 +5,7 @@
 
 struct MapNode;
 
-// Struct đơn giản để lưu trữ một đường đi
+// Struct lưu trữ một đường đi
 struct SimplePath {
     std::vector<std::pair<int, int>> edges;  // Các cạnh trong đường đi
 };

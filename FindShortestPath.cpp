@@ -1,5 +1,5 @@
 ﻿#include "FindShortestPath.h"
-#include "MapPanel.h" // Để có định nghĩa đầy đủ của MapNode
+#include "MapPanel.h" 
 
 // Hàm tính khoảng cách Euclidean giữa hai điểm
 double Distance(const wxPoint& p1, const wxPoint& p2) {

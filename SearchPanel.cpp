@@ -7,6 +7,8 @@
 #include <wx/stattext.h>
 #include <wx/button.h>
 
+using namespace std;
+
 SearchPanel::SearchPanel(wxWindow* parent)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(350, -1))
 {
@@ -63,13 +65,13 @@ void SearchPanel::CreateSearchSection(wxBoxSizer* mainSizer)
     m_endPointCtrl->SetHint(_T("Nhập điểm đến"));
     SimpleUIHelper::StyleTextCtrl(m_endPointCtrl);
 
-    // Layout inputs
+    // Layout input
     inputSizer->Add(startLabel, 0, wxBOTTOM, 4);
     inputSizer->Add(m_startPointCtrl, 0, wxEXPAND | wxBOTTOM, 12);
     inputSizer->Add(endLabel, 0, wxBOTTOM, 4);
     inputSizer->Add(m_endPointCtrl, 0, wxEXPAND, 0);
 
-    // Add to main sizer
+	// thêm vào main sizer
     mainSizer->Add(title, 0, wxALL, 16);
     mainSizer->Add(inputSizer, 0, wxEXPAND | wxLEFT | wxRIGHT, 16);
 }
@@ -113,7 +115,7 @@ void SearchPanel::CreateButtonSection(wxBoxSizer* mainSizer)
 
 void SearchPanel::CreateSavedPlacesSection(wxBoxSizer* mainSizer)
 {
-    // Section title
+	// Section title
     wxStaticText* placesTitle = new wxStaticText(this, wxID_ANY, _T("Địa điểm đã lưu"));
     wxFont titleFont = placesTitle->GetFont();
     titleFont.SetPointSize(12);
@@ -132,7 +134,7 @@ void SearchPanel::CreateSavedPlacesSection(wxBoxSizer* mainSizer)
     wxBoxSizer* placesSizer = new wxBoxSizer(wxVERTICAL);
 
     // Sample saved places data
-    std::vector<std::pair<wxString, wxString>> savedPlaces = {
+    vector<pair<wxString, wxString>> savedPlaces = {
         {_T("Dinh Độc Lập"), _T("135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1")},
         {_T("Nhà Thờ Đức Bà"), _T("01 Công Xã Paris, Bến Nghé, Quận 1")},
         {_T("Bưu Điện Trung Tâm"), _T("02 Công Xã Paris, Bến Nghé, Quận 1")},
@@ -194,6 +196,9 @@ void SearchPanel::SetMapPanel(MapPanel* mapPanel)
 
 void SearchPanel::OnSearchClicked(wxCommandEvent& event)
 {
+	// Clear all the paths before searching
+    m_mapPanel->ClearAllPaths();
+
     if (!m_mapPanel) {
         wxLogError(_T("Lỗi: MapPanel chưa được gán."));
         return;
