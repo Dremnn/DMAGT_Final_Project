@@ -19,19 +19,20 @@ MapPanel::MapPanel(wxWindow* parent)
 
     // Khởi tạo các node với loại node
     m_nodes.push_back({ wxPoint(472, 327), true, _T("Dinh Độc Lập") }); // Node 0
-    //R1
-    //m_nodes.push_back({ wxPoint(498, 301), false, wxEmptyString }); // Node 1
-    //m_nodes.push_back({ wxPoint(507, 302), false, wxEmptyString }); // Node 2
-    ////R2
-    //m_nodes.push_back({ wxPoint(514, 366), false, wxEmptyString }); // Node 3
-    //m_nodes.push_back({ wxPoint(527, 350), false, wxEmptyString }); // Node 4
-    //m_nodes.push_back({ wxPoint(495, 320), false, wxEmptyString }); // Node 5 
-    //m_nodes.push_back({ wxPoint(509, 304), false, wxEmptyString }); // Node 6
     m_nodes.push_back({ wxPoint(518, 313), true, _T("Nhà Thờ Đức Bà") }); // Node 1
     m_nodes.push_back({ wxPoint(520, 302), true,_T("Bưu Điện Trung Tâm") }); // Node 2
     m_nodes.push_back({ wxPoint(490, 424), true,_T("Chợ Bến Thành") }); // Node 3
 	m_nodes.push_back({ wxPoint(600, 425), true,_T("Bitexco Financial Tower") }); // Node 4
 	m_nodes.push_back({ wxPoint(560, 375), true,_T("Phố đi bộ Bùi Viện") }); // Node 5
+	//Dinh Doc Lap -> Nha Tho Duc Ba
+    //R1
+    m_nodes.push_back({ wxPoint(498, 301), false, wxEmptyString }); // Node 6
+    m_nodes.push_back({ wxPoint(507, 302), false, wxEmptyString }); // Node 7
+    ////R2
+    m_nodes.push_back({ wxPoint(514, 366), false, wxEmptyString }); // Node 8
+    m_nodes.push_back({ wxPoint(527, 350), false, wxEmptyString }); // Node 9
+    m_nodes.push_back({ wxPoint(495, 320), false, wxEmptyString }); // Node 10 
+    m_nodes.push_back({ wxPoint(509, 304), false, wxEmptyString }); // Node 11
 
 
 
@@ -225,15 +226,15 @@ void MapPanel::CreateGraph() {
     // Các cạnh đã định nghĩa trước
     // Dinh Độc Lập -> Nhà Thờ Đức Bà
     //Route 1: Djikstra
-    m_adajacentList[0][1] = Distance(m_nodes[0].pos, m_nodes[1].pos);
-    m_adajacentList[1][2] = Distance(m_nodes[1].pos, m_nodes[2].pos);
-    m_adajacentList[2][7] = Distance(m_nodes[2].pos, m_nodes[7].pos);
-    //Route 2:
-    m_adajacentList[0][3] = Distance(m_nodes[0].pos, m_nodes[3].pos);
-    m_adajacentList[3][4] = Distance(m_nodes[3].pos, m_nodes[4].pos);
-    m_adajacentList[4][5] = Distance(m_nodes[4].pos, m_nodes[5].pos);
-    m_adajacentList[5][6] = Distance(m_nodes[5].pos, m_nodes[6].pos);
+    m_adajacentList[0][6] = Distance(m_nodes[0].pos, m_nodes[6].pos);
     m_adajacentList[6][7] = Distance(m_nodes[6].pos, m_nodes[7].pos);
+    m_adajacentList[7][1] = Distance(m_nodes[7].pos, m_nodes[1].pos);
+    //Route 2:
+    m_adajacentList[0][8] = Distance(m_nodes[0].pos, m_nodes[8].pos);
+    m_adajacentList[8][9] = Distance(m_nodes[8].pos, m_nodes[9].pos);
+    m_adajacentList[9][10] = Distance(m_nodes[9].pos, m_nodes[10].pos);
+    m_adajacentList[10][11] = Distance(m_nodes[10].pos, m_nodes[11].pos);
+    m_adajacentList[11][1] = Distance(m_nodes[11].pos, m_nodes[1].pos);
 }
 
 void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
