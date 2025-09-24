@@ -2,6 +2,8 @@
 #include "FindShortestPath.h"
 #include "FindAllPaths.h"
 #include "NormalizeString.h"
+#include "ModernColors.h"
+#include "SimpleUIHelper.h"
 #include <wx/dcclient.h>
 #include <wx/graphics.h>
 #include <wx/dcbuffer.h>
@@ -250,7 +252,7 @@ void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
     }
     else {
         dc.SetBrush(*wxBLACK_BRUSH);
-        dc.DrawCircle(screenPos, 2);
+        dc.DrawCircle(screenPos, 0);
     }
 }
 
@@ -379,85 +381,114 @@ void MapPanel::OnLeftUp(wxMouseEvent& event)
 void MapPanel::CreateRouteInfoPanel()
 {
     m_routeInfoPanel = new wxPanel(this, wxID_ANY);
-    m_routeInfoPanel->SetBackgroundColour(wxColor(255, 255, 255));
+    m_routeInfoPanel->SetBackgroundColour(ModernColors::BACKGROUND_CARD);
 
     // Tạo sizer chính
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
 
-    // Tạo nút toggle với mũi tên
+    // Tạo nút toggle với mũi tên - UI cải thiện
     m_toggleButton = new wxButton(m_routeInfoPanel, wxID_ANY, wxT("▼ Thông tin lộ trình"),
         wxDefaultPosition, wxSize(-1, m_collapsedHeight));
-    m_toggleButton->SetBackgroundColour(wxColor(240, 240, 240));
+    m_toggleButton->SetBackgroundColour(ModernColors::PRIMARY_GREEN);
+    m_toggleButton->SetForegroundColour(ModernColors::TEXT_WHITE);
     wxFont buttonFont = m_toggleButton->GetFont();
     buttonFont.SetWeight(wxFONTWEIGHT_BOLD);
+    buttonFont.SetFaceName(wxT("Segoe UI"));
+    buttonFont.SetPointSize(10);
     m_toggleButton->SetFont(buttonFont);
     m_toggleButton->Bind(wxEVT_BUTTON, &MapPanel::OnTogglePopup, this);
 
-    // Panel chứa nội dung chi tiết
+    // Panel chứa nội dung chi tiết - UI cải thiện
     m_routeContentPanel = new wxPanel(m_routeInfoPanel, wxID_ANY);
-    m_routeContentPanel->SetBackgroundColour(wxColor(255, 255, 255));
+    m_routeContentPanel->SetBackgroundColour(ModernColors::BACKGROUND_CARD);
 
     // Tạo sizer cho nội dung
     wxBoxSizer* contentSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    // Cột 1: Khoảng cách
+    // Cột 1: Khoảng cách - UI cải thiện
     wxBoxSizer* col1Sizer = new wxBoxSizer(wxVERTICAL);
     wxStaticText* distTitle = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("Khoảng cách"));
-    distTitle->SetForegroundColour(wxColor(128, 128, 128));
+    distTitle->SetForegroundColour(ModernColors::TEXT_SECONDARY);
+    wxFont titleFont = distTitle->GetFont();
+    titleFont.SetFaceName(wxT("Segoe UI"));
+    titleFont.SetPointSize(9);
+    titleFont.SetWeight(wxFONTWEIGHT_MEDIUM);
+    distTitle->SetFont(titleFont);
+
     m_distanceLabel = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("0 km"));
     wxFont distFont = m_distanceLabel->GetFont();
     distFont.SetWeight(wxFONTWEIGHT_BOLD);
     distFont.SetPointSize(14);
+    distFont.SetFaceName(wxT("Segoe UI"));
     m_distanceLabel->SetFont(distFont);
-    m_distanceLabel->SetForegroundColour(wxColor(0, 120, 215));
+    m_distanceLabel->SetForegroundColour(ModernColors::PRIMARY_GREEN);
 
     col1Sizer->Add(distTitle, 0, wxBOTTOM, 2);
     col1Sizer->Add(m_distanceLabel, 0, 0, 0);
 
-    // Cột 2: Giá Grab
+    // Cột 2: Giá Grab - UI cải thiện
     wxBoxSizer* col2Sizer = new wxBoxSizer(wxVERTICAL);
     wxStaticText* priceTitle = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("Giá Grab"));
-    priceTitle->SetForegroundColour(wxColor(128, 128, 128));
+    priceTitle->SetForegroundColour(ModernColors::TEXT_SECONDARY);
+    priceTitle->SetFont(titleFont);
+
     m_grabPriceLabel = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("0 VNĐ"));
     wxFont priceFont = m_grabPriceLabel->GetFont();
     priceFont.SetWeight(wxFONTWEIGHT_BOLD);
     priceFont.SetPointSize(14);
+    priceFont.SetFaceName(wxT("Segoe UI"));
     m_grabPriceLabel->SetFont(priceFont);
-    m_grabPriceLabel->SetForegroundColour(wxColor(0, 150, 0));
+    m_grabPriceLabel->SetForegroundColour(ModernColors::ACCENT_GREEN);
 
     col2Sizer->Add(priceTitle, 0, wxBOTTOM, 2);
     col2Sizer->Add(m_grabPriceLabel, 0, 0, 0);
 
-    // Cột 3: Thời gian (ước tính)
+    // Cột 3: Thời gian (ước tính) - UI cải thiện
     wxBoxSizer* col3Sizer = new wxBoxSizer(wxVERTICAL);
     wxStaticText* timeTitle = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("Thời gian"));
-    timeTitle->SetForegroundColour(wxColor(128, 128, 128));
+    timeTitle->SetForegroundColour(ModernColors::TEXT_SECONDARY);
+    timeTitle->SetFont(titleFont);
+
     m_timeLabel = new wxStaticText(m_routeContentPanel, wxID_ANY, _T("0 phút"));
     wxFont timeFont = m_timeLabel->GetFont();
     timeFont.SetWeight(wxFONTWEIGHT_BOLD);
     timeFont.SetPointSize(14);
+    timeFont.SetFaceName(wxT("Segoe UI"));
     m_timeLabel->SetFont(timeFont);
-    m_timeLabel->SetForegroundColour(wxColor(255, 140, 0));
+    m_timeLabel->SetForegroundColour(ModernColors::DARK_GREEN);
 
     col3Sizer->Add(timeTitle, 0, wxBOTTOM, 2);
     col3Sizer->Add(m_timeLabel, 0, 0, 0);
 
-    contentSizer->Add(col1Sizer, 1, wxALL, 15);
-    contentSizer->Add(col2Sizer, 1, wxTOP | wxBOTTOM | wxRIGHT, 15);
-    contentSizer->Add(col3Sizer, 1, wxTOP | wxBOTTOM | wxRIGHT, 15);
+    // Spacing giảm để tất cả content hiển thị được
+    contentSizer->Add(col1Sizer, 1, wxALL, 12);
+    contentSizer->Add(col2Sizer, 1, wxTOP | wxBOTTOM | wxRIGHT, 12);
+    contentSizer->Add(col3Sizer, 1, wxTOP | wxBOTTOM | wxRIGHT, 12);
 
     m_routeContentPanel->SetSizer(contentSizer);
 
-    // Thêm vào sizer chính
-    mainSizer->Add(m_toggleButton, 0, wxEXPAND);
-    mainSizer->Add(m_routeContentPanel, 1, wxEXPAND);
+    // Thêm border line để phân cách
+    wxStaticLine* borderLine = new wxStaticLine(m_routeInfoPanel, wxID_ANY,
+        wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    borderLine->SetBackgroundColour(ModernColors::BORDER_COLOR);
+
+    // Thêm vào sizer chính với spacing cải thiện
+    mainSizer->Add(m_toggleButton, 0, wxEXPAND | wxALL, 2);
+    mainSizer->Add(borderLine, 0, wxEXPAND | wxLEFT | wxRIGHT, 2);
+    mainSizer->Add(m_routeContentPanel, 1, wxEXPAND | wxALL, 2);
 
     m_routeInfoPanel->SetSizer(mainSizer);
 
-    // Ẩn panel ban đầu
+    // FIX: Khởi tạo đúng trạng thái - BAN ĐẦU ẨN HOÀN TOÀN
     m_routeInfoPanel->Hide();
-    m_currentHeight = m_popupHeight; // Bắt đầu với trạng thái mở rộng
-    m_isExpanded = true;
+    m_routeContentPanel->Hide(); // Ẩn content ngay từ đầu
+    m_showRouteInfo = false;     // Không hiển thị route info
+    m_isExpanded = false;        // Trạng thái thu gọn
+    m_currentHeight = m_collapsedHeight;
+    m_targetHeight = m_collapsedHeight;
+
+    // Đảm bảo m_popupHeight đủ lớn để hiển thị tất cả content
+    m_popupHeight = 140; // Tăng từ 120 lên 140
 }
 
 // Hiển thị popup với thông tin mới
@@ -467,13 +498,9 @@ void MapPanel::ShowRouteInfo(double distanceMeters)
 
     // Tính toán thông tin
     double distanceKm = distanceMeters / 1000.0;
-
-    // Giá Grab ước tính
     double basePrice = 15000;
     double pricePerKm = 12000;
     double estimatedPrice = basePrice + (distanceKm * pricePerKm);
-
-    // Thời gian ước tính
     double estimatedTimeMinutes = (distanceKm / 20.0) * 60.0;
 
     // Cập nhật text
@@ -487,12 +514,13 @@ void MapPanel::ShowRouteInfo(double distanceMeters)
     m_grabPriceLabel->SetLabel(wxString::Format(wxT("%.0f VNĐ"), estimatedPrice));
     m_timeLabel->SetLabel(wxString::Format(wxT("%.0f phút"), estimatedTimeMinutes));
 
-    // Hiển thị popup ở trạng thái mở rộng
+    // Hiển thị popup ở trạng thái MỞ RỘNG từ đầu
     m_isExpanded = true;
     m_currentHeight = m_popupHeight;
     m_targetHeight = m_popupHeight;
-    UpdateToggleButtonText();
+    m_routeContentPanel->Show(); // Hiện content ngay
 
+    UpdateToggleButtonText();
     UpdateRouteInfoPosition();
     m_routeInfoPanel->Show();
     m_showRouteInfo = true;
@@ -560,10 +588,13 @@ void MapPanel::UpdateToggleButtonText()
     if (m_toggleButton) {
         if (m_isExpanded) {
             m_toggleButton->SetLabel(wxT("▲ Thu gọn"));
+            m_toggleButton->SetBackgroundColour(ModernColors::DARK_GREEN);
         }
         else {
             m_toggleButton->SetLabel(wxT("▼ Thông tin lộ trình"));
+            m_toggleButton->SetBackgroundColour(ModernColors::PRIMARY_GREEN);
         }
+        m_toggleButton->Refresh();
     }
 }
 

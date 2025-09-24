@@ -27,6 +27,7 @@
     <ClInclude Include="NormalizeString.h" />
     <ClInclude Include="FindShortestPath.h" />
     <ClInclude Include="SearchPanel.h" />
+    <ClInclude Include="SimpleUIHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
@@ -37,6 +38,7 @@
     <ClCompile Include="NormalizeString.cpp" />
     <ClCompile Include="FindShortestPath.cpp" />
     <ClCompile Include="SearchPanel.cpp" />
+    <ClCompile Include="SimpleUIHelper.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

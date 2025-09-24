@@ -1,76 +1,137 @@
 ﻿#include "SearchPanel.h"
 #include "MapPanel.h"
 #include "ModernColors.h"
-#include <wx/scrolwin.h>
-#include <wx/statline.h>
+#include "SimpleUIHelper.h"
 #include <wx/msgdlg.h>
 #include <wx/log.h>
-#include <wx/button.h>
 #include <wx/stattext.h>
+#include <wx/button.h>
 
 SearchPanel::SearchPanel(wxWindow* parent)
     : wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(350, -1))
 {
-    // Cài đặt màu nền
-    this->SetBackgroundColour(wxColour(255, 255, 255));
+    SetupModernUI();
+}
 
-    // Khởi tạo các Sizer
-    wxBoxSizer* sidebarSizer = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* mainSearchSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* inputBoxSizer = new wxBoxSizer(wxVERTICAL);
+void SearchPanel::SetupModernUI()
+{
+    // Set modern background color
+    SetBackgroundColour(ModernColors::BACKGROUND_CARD);
 
-    // Tạo các TextCtrl để nhập điểm đi/đến
-    m_startPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+    // Create main vertical layout with modern spacing
+    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+
+    // Add sections
+    CreateSearchSection(mainSizer);
+    CreateButtonSection(mainSizer);
+    CreateSavedPlacesSection(mainSizer);
+
+    SetSizer(mainSizer);
+}
+
+void SearchPanel::CreateSearchSection(wxBoxSizer* mainSizer)
+{
+    // Title
+    wxStaticText* title = new wxStaticText(this, wxID_ANY, _T("Tìm đường đi"));
+    wxFont titleFont = title->GetFont();
+    titleFont.SetPointSize(16);
+    titleFont.SetWeight(wxFONTWEIGHT_BOLD);
+    titleFont.SetFaceName("Segoe UI");
+    title->SetFont(titleFont);
+    title->SetForegroundColour(ModernColors::TEXT_PRIMARY);
+
+    // Input fields container
+    wxBoxSizer* inputSizer = new wxBoxSizer(wxVERTICAL);
+
+    // Start point input
+    wxStaticText* startLabel = new wxStaticText(this, wxID_ANY, _T("Điểm đi:"));
+    SimpleUIHelper::SetModernFont(startLabel);
+    startLabel->SetForegroundColour(ModernColors::TEXT_SECONDARY);
+
+    m_startPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
+        wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
     m_startPointCtrl->SetHint(_T("Nhập điểm đi"));
+    SimpleUIHelper::StyleTextCtrl(m_startPointCtrl);
 
-    m_endPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+    // End point input
+    wxStaticText* endLabel = new wxStaticText(this, wxID_ANY, _T("Điểm đến:"));
+    SimpleUIHelper::SetModernFont(endLabel);
+    endLabel->SetForegroundColour(ModernColors::TEXT_SECONDARY);
+
+    m_endPointCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
+        wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
     m_endPointCtrl->SetHint(_T("Nhập điểm đến"));
+    SimpleUIHelper::StyleTextCtrl(m_endPointCtrl);
 
-    // Thêm TextCtrl vào Sizer
-    inputBoxSizer->Add(m_startPointCtrl, 1, wxEXPAND | wxBOTTOM, 5);
-    inputBoxSizer->Add(m_endPointCtrl, 1, wxEXPAND, 0);
+    // Layout inputs
+    inputSizer->Add(startLabel, 0, wxBOTTOM, 4);
+    inputSizer->Add(m_startPointCtrl, 0, wxEXPAND | wxBOTTOM, 12);
+    inputSizer->Add(endLabel, 0, wxBOTTOM, 4);
+    inputSizer->Add(m_endPointCtrl, 0, wxEXPAND, 0);
 
-    // Tạo nút tìm kiếm
-    wxBitmapButton* searchButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(_T("search.png"), wxBITMAP_TYPE_PNG));
+    // Add to main sizer
+    mainSizer->Add(title, 0, wxALL, 16);
+    mainSizer->Add(inputSizer, 0, wxEXPAND | wxLEFT | wxRIGHT, 16);
+}
 
-    // Styling cho search button
-    searchButton->SetBackgroundColour(ModernColors::PRIMARY);
-    searchButton->SetMinSize(wxSize(50, 50));
+void SearchPanel::CreateButtonSection(wxBoxSizer* mainSizer)
+{
+    wxBoxSizer* buttonSizer = new wxBoxSizer(wxVERTICAL);
 
-    // Tạo rounded corners bằng cách custom paint
-    searchButton->SetBackgroundStyle(wxBG_STYLE_PAINT);
+    // Primary search button
+    wxButton* searchButton = new wxButton(this, wxID_ANY, _T("🔍 Tìm đường đi"));
+    SimpleUIHelper::StyleButton(searchButton, true); // Primary style
 
-    // Thêm các thành phần tìm kiếm vào mainSizer
-    mainSearchSizer->Add(inputBoxSizer, 1, wxEXPAND | wxRIGHT, 10);
-    mainSearchSizer->Add(searchButton, 0, wxALIGN_CENTER_VERTICAL);
-    sidebarSizer->Add(mainSearchSizer, 0, wxEXPAND | wxALL, 10);
+    // Secondary buttons
+    wxButton* allPathsButton = new wxButton(this, wxID_ANY, _T("Tất cả đường đi"));
+    SimpleUIHelper::StyleButton(allPathsButton, false); // Secondary style
 
-    // Tạo Sizer cho các nút chức năng
-    wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxButton* allPathsButton = new wxButton(this, wxID_ANY, _T("Hiển thị tất cả đường đi"));
-    wxButton* clearButton = new wxButton(this, wxID_ANY, _T("Xóa các đường đi"));
+    wxButton* clearButton = new wxButton(this, wxID_ANY, _T("Xóa đường đi"));
+    clearButton->SetBackgroundColour(ModernColors::DANGER);
+    clearButton->SetForegroundColour(ModernColors::TEXT_WHITE);
+    SimpleUIHelper::SetModernFont(clearButton);
+    clearButton->SetMinSize(wxSize(-1, 36));
 
-    buttonSizer->Add(allPathsButton, 1, wxEXPAND | wxRIGHT, 5);
-    buttonSizer->Add(clearButton, 1, wxEXPAND | wxLEFT, 5);
-    sidebarSizer->Add(buttonSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    // Layout buttons
+    buttonSizer->Add(searchButton, 0, wxEXPAND | wxBOTTOM, 8);
+    buttonSizer->Add(allPathsButton, 0, wxEXPAND | wxBOTTOM, 8);
+    buttonSizer->Add(clearButton, 0, wxEXPAND, 0);
 
-    // Thêm đường kẻ phân cách
-    sidebarSizer->Add(new wxStaticLine(this), 0, wxEXPAND | wxALL, 10);
+    // Add divider line
+    wxStaticLine* divider = new wxStaticLine(this, wxID_ANY, wxDefaultPosition,
+        wxSize(-1, 1), wxLI_HORIZONTAL);
 
-    // Tiêu đề cho các địa điểm đã lưu
-    wxStaticText* resultsTitle = new wxStaticText(this, wxID_ANY, _T("Saved Places"));
-    wxFont font = resultsTitle->GetFont();
-    font.SetPointSize(12);
-    font.SetWeight(wxFONTWEIGHT_BOLD);
-    resultsTitle->SetFont(font);
-    sidebarSizer->Add(resultsTitle, 0, wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    // Add to main sizer
+    mainSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 16);
+    mainSizer->Add(divider, 0, wxEXPAND | wxLEFT | wxRIGHT, 16);
 
-    // Tạo cửa sổ cuộn để hiển thị danh sách địa điểm
-    wxScrolledWindow* scrolledWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
+    // Bind button events
+    searchButton->Bind(wxEVT_BUTTON, &SearchPanel::OnSearchClicked, this);
+    allPathsButton->Bind(wxEVT_BUTTON, &SearchPanel::OnShowAllPathsClicked, this);
+    clearButton->Bind(wxEVT_BUTTON, &SearchPanel::OnClearClicked, this);
+}
+
+void SearchPanel::CreateSavedPlacesSection(wxBoxSizer* mainSizer)
+{
+    // Section title
+    wxStaticText* placesTitle = new wxStaticText(this, wxID_ANY, _T("Địa điểm đã lưu"));
+    wxFont titleFont = placesTitle->GetFont();
+    titleFont.SetPointSize(12);
+    titleFont.SetWeight(wxFONTWEIGHT_BOLD);
+    titleFont.SetFaceName("Segoe UI");
+    placesTitle->SetFont(titleFont);
+    placesTitle->SetForegroundColour(ModernColors::TEXT_PRIMARY);
+
+    // Scrolled window for places list
+    wxScrolledWindow* scrolledWindow = new wxScrolledWindow(this, wxID_ANY,
+        wxDefaultPosition, wxDefaultSize, wxVSCROLL);
     scrolledWindow->SetScrollRate(0, 5);
+    scrolledWindow->SetBackgroundColour(ModernColors::BACKGROUND_CARD);
 
-    // Sizer cho danh sách địa điểm
-    wxBoxSizer* resultsSizer = new wxBoxSizer(wxVERTICAL);
+    // Container for saved places
+    wxBoxSizer* placesSizer = new wxBoxSizer(wxVERTICAL);
+
+    // Sample saved places data
     std::vector<std::pair<wxString, wxString>> savedPlaces = {
         {_T("Dinh Độc Lập"), _T("135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1")},
         {_T("Nhà Thờ Đức Bà"), _T("01 Công Xã Paris, Bến Nghé, Quận 1")},
@@ -80,27 +141,52 @@ SearchPanel::SearchPanel(wxWindow* parent)
         {_T("Bitexco Financial Tower"), _T("02 Hải Triều, Bến Nghé, Quận 1")}
     };
 
+    // Create place items with modern styling
     for (const auto& place : savedPlaces) {
-        wxStaticText* nameText = new wxStaticText(scrolledWindow, wxID_ANY, place.first);
-        wxStaticText* addressText = new wxStaticText(scrolledWindow, wxID_ANY, place.second);
+        // Container panel for each place
+        wxPanel* placePanel = new wxPanel(scrolledWindow);
+        placePanel->SetBackgroundColour(ModernColors::BACKGROUND_INPUT);
+
+        // Place name (bold)
+        wxStaticText* nameText = new wxStaticText(placePanel, wxID_ANY, place.first);
         wxFont nameFont = nameText->GetFont();
         nameFont.SetWeight(wxFONTWEIGHT_BOLD);
+        nameFont.SetFaceName("Segoe UI");
         nameText->SetFont(nameFont);
-        resultsSizer->Add(nameText, 0, wxEXPAND | wxBOTTOM, 2);
-        resultsSizer->Add(addressText, 0, wxEXPAND | wxBOTTOM, 8);
-        resultsSizer->Add(new wxStaticLine(scrolledWindow), 0, wxEXPAND | wxBOTTOM, 8);
-    }
-    scrolledWindow->SetSizer(resultsSizer);
-    sidebarSizer->Add(scrolledWindow, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
-    this->SetSizer(sidebarSizer);
+        nameText->SetForegroundColour(ModernColors::TEXT_PRIMARY);
 
-    // Gắn sự kiện cho các nút
-    searchButton->Bind(wxEVT_BUTTON, &SearchPanel::OnSearchClicked, this);
-    allPathsButton->Bind(wxEVT_BUTTON, &SearchPanel::OnShowAllPathsClicked, this);
-    clearButton->Bind(wxEVT_BUTTON, &SearchPanel::OnClearClicked, this);
+        // Place address (regular)
+        wxStaticText* addressText = new wxStaticText(placePanel, wxID_ANY, place.second);
+        wxFont addressFont = addressText->GetFont();
+        addressFont.SetFaceName("Segoe UI");
+        addressFont.SetPointSize(addressFont.GetPointSize() - 1);
+        addressText->SetFont(addressFont);
+        addressText->SetForegroundColour(ModernColors::TEXT_SECONDARY);
+
+        // Layout for place item
+        wxBoxSizer* placeSizer = new wxBoxSizer(wxVERTICAL);
+        placeSizer->Add(nameText, 0, wxEXPAND | wxALL, 8);
+        placeSizer->Add(addressText, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 8);
+        placePanel->SetSizer(placeSizer);
+
+        // Add to places list
+        placesSizer->Add(placePanel, 0, wxEXPAND | wxBOTTOM, 4);
+
+        // Add subtle separator except for last item
+        if (&place != &savedPlaces.back()) {
+            wxStaticLine* separator = new wxStaticLine(scrolledWindow, wxID_ANY,
+                wxDefaultPosition, wxSize(-1, 1));
+            placesSizer->Add(separator, 0, wxEXPAND | wxBOTTOM, 4);
+        }
+    }
+
+    scrolledWindow->SetSizer(placesSizer);
+
+    // Add to main sizer
+    mainSizer->Add(placesTitle, 0, wxALL, 16);
+    mainSizer->Add(scrolledWindow, 1, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 16);
 }
 
-// Hàm để gán con trỏ MapPanel
 void SearchPanel::SetMapPanel(MapPanel* mapPanel)
 {
     m_mapPanel = mapPanel;
@@ -108,49 +194,70 @@ void SearchPanel::SetMapPanel(MapPanel* mapPanel)
 
 void SearchPanel::OnSearchClicked(wxCommandEvent& event)
 {
-    // Kiểm tra xem MapPanel đã được gán chưa
     if (!m_mapPanel) {
-        wxLogError("Lỗi: MapPanel chưa được gán.");
+        wxLogError(_T("Lỗi: MapPanel chưa được gán."));
         return;
     }
 
-    // Lấy tên địa điểm từ TextCtrl
+    // Get input values
     wxString startName = m_startPointCtrl->GetValue();
     wxString endName = m_endPointCtrl->GetValue();
 
-    // Tìm chỉ số node tương ứng với tên địa điểm
-    int startIndex = m_mapPanel->FindNodeIndexByName(startName);
-    int endIndex = m_mapPanel->FindNodeIndexByName(endName);
-
-    // Kiểm tra tính hợp lệ của input
-    if (startIndex == -1 || endIndex == -1) {
-        wxMessageBox(_T("Vui lòng nhập một hoặc cả hai địa điểm hợp lệ."));
+    // Validate inputs
+    if (startName.IsEmpty() || endName.IsEmpty()) {
+        wxMessageBox(_T("Vui lòng nhập cả điểm đi và điểm đến."),
+            _T("Thông tin không đầy đủ"), wxOK | wxICON_WARNING);
         return;
     }
 
-    // Gọi hàm tìm và vẽ đường đi ngắn nhất trên MapPanel
+    // Find node indices
+    int startIndex = m_mapPanel->FindNodeIndexByName(startName);
+    int endIndex = m_mapPanel->FindNodeIndexByName(endName);
+
+    if (startIndex == -1 || endIndex == -1) {
+        wxString message = _T("Không tìm thấy địa điểm:\n");
+        if (startIndex == -1) message += _T("- ") + startName + _T("\n");
+        if (endIndex == -1) message += _T("- ") + endName + _T("\n");
+        message += _T("\nVui lòng kiểm tra lại tên địa điểm.");
+
+        wxMessageBox(message, _T("Địa điểm không tồn tại"), wxOK | wxICON_ERROR);
+        return;
+    }
+
+    // Find and display shortest path
     m_mapPanel->FindAndDrawNewPath(startIndex, endIndex);
 }
 
 void SearchPanel::OnShowAllPathsClicked(wxCommandEvent& event)
 {
     if (!m_mapPanel) {
-        wxLogError("Lỗi: MapPanel chưa được gán.");
+        wxLogError(_T("Lỗi: MapPanel chưa được gán."));
         return;
     }
 
     wxString startName = m_startPointCtrl->GetValue();
     wxString endName = m_endPointCtrl->GetValue();
 
+    if (startName.IsEmpty() || endName.IsEmpty()) {
+        wxMessageBox(_T("Vui lòng nhập cả điểm đi và điểm đến."),
+            _T("Thông tin không đầy đủ"), wxOK | wxICON_WARNING);
+        return;
+    }
+
     int startIndex = m_mapPanel->FindNodeIndexByName(startName);
     int endIndex = m_mapPanel->FindNodeIndexByName(endName);
 
     if (startIndex == -1 || endIndex == -1) {
-        wxMessageBox(_T("Vui lòng nhập một hoặc cả hai địa điểm hợp lệ."));
+        wxString message = _T("Không tìm thấy địa điểm:\n");
+        if (startIndex == -1) message += _T("- ") + startName + _T("\n");
+        if (endIndex == -1) message += _T("- ") + endName + _T("\n");
+        message += _T("\nVui lòng kiểm tra lại tên địa điểm.");
+
+        wxMessageBox(message, _T("Địa điểm không tồn tại"), wxOK | wxICON_ERROR);
         return;
     }
 
-    // Gọi hàm tìm và vẽ tất cả đường đi trên MapPanel
+    // Find and display all paths
     m_mapPanel->FindAndDrawAllPaths(startIndex, endIndex);
 }
 
@@ -159,4 +266,8 @@ void SearchPanel::OnClearClicked(wxCommandEvent& event)
     if (m_mapPanel) {
         m_mapPanel->ClearAllPaths();
     }
+
+    // Clear input fields
+    m_startPointCtrl->Clear();
+    m_endPointCtrl->Clear();
 }

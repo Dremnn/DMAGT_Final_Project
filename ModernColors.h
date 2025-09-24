@@ -2,15 +2,23 @@
 #include <wx/wx.h>
 
 struct ModernColors {
-    // Declare the static members in the header
-    // Use the `extern` keyword to indicate they are defined elsewhere
-    static const wxColor PRIMARY;
-    static const wxColor SECONDARY;
-    static const wxColor SUCCESS;
-    static const wxColor WARNING;
-    static const wxColor DANGER;
-    static const wxColor BACKGROUND;
-    static const wxColor SURFACE;
+    // Green theme colors (SM style)
+    static const wxColor PRIMARY_GREEN;
+    static const wxColor LIGHT_GREEN;
+    static const wxColor DARK_GREEN;
+    static const wxColor ACCENT_GREEN;
+
+    // Backgrounds
+    static const wxColor BACKGROUND_MAIN;
+    static const wxColor BACKGROUND_CARD;
+    static const wxColor BACKGROUND_INPUT;
+
+    // Text
     static const wxColor TEXT_PRIMARY;
     static const wxColor TEXT_SECONDARY;
+    static const wxColor TEXT_WHITE;
+
+    // Others
+    static const wxColor BORDER_COLOR;
+    static const wxColor DANGER;
 };

@@ -39,6 +39,9 @@
     <ClInclude Include="ModernColors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SimpleUIHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ModernColors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleUIHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
