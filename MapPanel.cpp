@@ -24,17 +24,64 @@ MapPanel::MapPanel(wxWindow* parent)
     m_nodes.push_back({ wxPoint(518, 313), true, _T("Nhà Thờ Đức Bà") }); // Node 1
     m_nodes.push_back({ wxPoint(520, 302), true,_T("Bưu Điện Trung Tâm") }); // Node 2
     m_nodes.push_back({ wxPoint(490, 424), true,_T("Chợ Bến Thành") }); // Node 3
-	m_nodes.push_back({ wxPoint(600, 425), true,_T("Bitexco Financial Tower") }); // Node 4
-	m_nodes.push_back({ wxPoint(560, 375), true,_T("Phố đi bộ Bùi Viện") }); // Node 5
-	//Dinh Doc Lap -> Nha Tho Duc Ba
+    m_nodes.push_back({ wxPoint(600, 425), true,_T("Bitexco Financial Tower") }); // Node 4
+    m_nodes.push_back({ wxPoint(560, 375), true,_T("Phố đi bộ Nguyễn Huệ") }); // Node 5
+    //Dinh Doc Lap -> Nha Tho Duc Ba
     //R1
     m_nodes.push_back({ wxPoint(498, 301), false, wxEmptyString }); // Node 6
     m_nodes.push_back({ wxPoint(507, 302), false, wxEmptyString }); // Node 7
-    ////R2
+    //R2
     m_nodes.push_back({ wxPoint(514, 366), false, wxEmptyString }); // Node 8
     m_nodes.push_back({ wxPoint(527, 350), false, wxEmptyString }); // Node 9
     m_nodes.push_back({ wxPoint(495, 320), false, wxEmptyString }); // Node 10 
     m_nodes.push_back({ wxPoint(509, 304), false, wxEmptyString }); // Node 11
+    //**
+    //Dinh Doc Lap -> Buu Dien Trung Tam
+    //R1
+    m_nodes.push_back({ wxPoint(524, 318), false, wxEmptyString }); // Node 12
+    m_nodes.push_back({ wxPoint(530, 312), false, wxEmptyString }); // Node 13
+    //R2
+    m_nodes.push_back({ wxPoint(481, 335), false, wxEmptyString }); // Node 14
+    //Dinh Doc Lap -> Cho Ben Thanh
+    //R1
+    m_nodes.push_back({ wxPoint(496, 350), false, wxEmptyString }); // Node 15
+    m_nodes.push_back({ wxPoint(467, 382), false, wxEmptyString }); // Node 16
+    m_nodes.push_back({ wxPoint(482, 396), false, wxEmptyString }); // Node 17
+    m_nodes.push_back({ wxPoint(490, 410), false, wxEmptyString }); // Node 18
+    m_nodes.push_back({ wxPoint(483, 414), false, wxEmptyString }); // Node 19
+    //R2
+    m_nodes.push_back({ wxPoint(425, 413), false, wxEmptyString }); // Node 20
+    m_nodes.push_back({ wxPoint(440, 427), false, wxEmptyString }); // Node 21
+    //Dinh Doc Lap -> Bitexco Financial Tower
+    //R1
+    m_nodes.push_back({ wxPoint(513, 366), false, wxEmptyString }); // Node 22
+    m_nodes.push_back({ wxPoint(530, 408), false, wxEmptyString }); // Node 23
+    m_nodes.push_back({ wxPoint(605, 417), false, wxEmptyString }); // Node 24
+    //R2
+    m_nodes.push_back({ wxPoint(541, 432), false, wxEmptyString }); // Node 25
+    m_nodes.push_back({ wxPoint(559, 424), false, wxEmptyString }); // Node 26
+    m_nodes.push_back({ wxPoint(580, 408), false, wxEmptyString }); // Node 27
+    m_nodes.push_back({ wxPoint(592, 430), false, wxEmptyString }); // Node 28
+    //Dinh Doc Lap -> Pho Di Bo Nguyen Hue
+    //R2
+    m_nodes.push_back({ wxPoint(527, 315), false, wxEmptyString }); // Node 29
+    m_nodes.push_back({ wxPoint(557, 344), false, wxEmptyString }); // Node 30
+    m_nodes.push_back({ wxPoint(543, 360), false, wxEmptyString }); // Node 31
+
+    //Nha Tho Duc Ba -> Dinh Doc Lap
+    //R1
+    m_nodes.push_back({ wxPoint(510, 333), false, wxEmptyString }); // Node 32
+    m_nodes.push_back({ wxPoint(478, 304), false, wxEmptyString }); // Node 33
+    m_nodes.push_back({ wxPoint(463, 320), false, wxEmptyString }); // Node 34
+    //R2
+    m_nodes.push_back({ wxPoint(508, 291), false, wxEmptyString }); // Node 35
+    m_nodes.push_back({ wxPoint(501, 291), false, wxEmptyString }); // Node 36
+    m_nodes.push_back({ wxPoint(495, 287), false, wxEmptyString }); // Node 37
+    m_nodes.push_back({ wxPoint(513, 394), false, wxEmptyString }); // Node 38
+    m_nodes.push_back({ wxPoint(486, 312), false, wxEmptyString }); // Node 39
+    m_nodes.push_back({ wxPoint(501, 298), false, wxEmptyString }); // Node 40
+    //
+    m_nodes.push_back({ wxPoint(522, 385), false, wxEmptyString }); // Node 41
 
 
 
@@ -225,9 +272,8 @@ void MapPanel::FindAndDrawAllPaths(int startIndex, int endIndex)
 void MapPanel::CreateGraph() {
     m_adajacentList.clear();
 
-    // Các cạnh đã định nghĩa trước
     // Dinh Độc Lập -> Nhà Thờ Đức Bà
-    //Route 1: Djikstra
+     //Route 1: Djikstra
     m_adajacentList[0][6] = Distance(m_nodes[0].pos, m_nodes[6].pos);
     m_adajacentList[6][7] = Distance(m_nodes[6].pos, m_nodes[7].pos);
     m_adajacentList[7][1] = Distance(m_nodes[7].pos, m_nodes[1].pos);
@@ -237,6 +283,192 @@ void MapPanel::CreateGraph() {
     m_adajacentList[9][10] = Distance(m_nodes[9].pos, m_nodes[10].pos);
     m_adajacentList[10][11] = Distance(m_nodes[10].pos, m_nodes[11].pos);
     m_adajacentList[11][1] = Distance(m_nodes[11].pos, m_nodes[1].pos);
+    //Dinh Doc Lap -> Buu Dien Trung Tam
+    //Route 1: Djikstra
+    m_adajacentList[0][6] = Distance(m_nodes[0].pos, m_nodes[6].pos);
+    m_adajacentList[6][7] = Distance(m_nodes[6].pos, m_nodes[7].pos);
+    m_adajacentList[7][12] = Distance(m_nodes[7].pos, m_nodes[12].pos);
+    m_adajacentList[12][13] = Distance(m_nodes[12].pos, m_nodes[13].pos);
+    m_adajacentList[13][2] = Distance(m_nodes[13].pos, m_nodes[2].pos);
+    //Route 2:
+    m_adajacentList[0][14] = Distance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][10] = Distance(m_nodes[14].pos, m_nodes[10].pos);
+    m_adajacentList[10][11] = Distance(m_nodes[10].pos, m_nodes[8].pos);
+    m_adajacentList[11][12] = Distance(m_nodes[8].pos, m_nodes[12].pos);
+    m_adajacentList[12][13] = Distance(m_nodes[12].pos, m_nodes[13].pos);
+    m_adajacentList[13][2] = Distance(m_nodes[13].pos, m_nodes[2].pos);
+    //Dinh Doc Lap -> Cho Ben Thanh
+    //Route 1: Djikstra
+    m_adajacentList[0][14] = Distance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = Distance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][16] = Distance(m_nodes[15].pos, m_nodes[16].pos);
+    m_adajacentList[16][17] = Distance(m_nodes[16].pos, m_nodes[17].pos);
+    m_adajacentList[17][18] = Distance(m_nodes[17].pos, m_nodes[18].pos);
+    m_adajacentList[18][19] = Distance(m_nodes[18].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = Distance(m_nodes[19].pos, m_nodes[3].pos);
+    //Route 2:
+    m_adajacentList[0][14] = Distance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = Distance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][16] = Distance(m_nodes[15].pos, m_nodes[16].pos);
+    m_adajacentList[16][20] = Distance(m_nodes[16].pos, m_nodes[20].pos);
+    m_adajacentList[20][21] = Distance(m_nodes[20].pos, m_nodes[21].pos);
+    m_adajacentList[21][17] = Distance(m_nodes[21].pos, m_nodes[17].pos);
+    m_adajacentList[17][18] = Distance(m_nodes[17].pos, m_nodes[18].pos);
+    m_adajacentList[18][19] = Distance(m_nodes[18].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = Distance(m_nodes[19].pos, m_nodes[3].pos);
+    //Dinh Doc Lap -> Bitexco Financial Tower
+    //Route 1:
+    m_adajacentList[0][14] = Distance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = Distance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = Distance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][23] = Distance(m_nodes[22].pos, m_nodes[23].pos);
+    m_adajacentList[23][5] = Distance(m_nodes[23].pos, m_nodes[5].pos);
+    m_adajacentList[5][24] = Distance(m_nodes[5].pos, m_nodes[24].pos);
+    m_adajacentList[24][4] = Distance(m_nodes[24].pos, m_nodes[4].pos);
+    //Route 2:
+    m_adajacentList[0][14] = Distance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = Distance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = Distance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][25] = Distance(m_nodes[22].pos, m_nodes[25].pos);
+    m_adajacentList[25][26] = Distance(m_nodes[25].pos, m_nodes[26].pos);
+    m_adajacentList[26][27] = Distance(m_nodes[26].pos, m_nodes[27].pos);
+    m_adajacentList[27][28] = Distance(m_nodes[27].pos, m_nodes[28].pos);
+    m_adajacentList[28][4] = Distance(m_nodes[28].pos, m_nodes[4].pos);
+    //Dinh Doc Lap -> Pho Di Bo Nguyen Hue
+ //Route 1:
+    m_adajacentList[0][14] = Distance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = Distance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = Distance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][23] = Distance(m_nodes[22].pos, m_nodes[23].pos);
+    m_adajacentList[23][5] = Distance(m_nodes[23].pos, m_nodes[5].pos);
+    //Route 2:
+    m_adajacentList[0][6] = Distance(m_nodes[0].pos, m_nodes[6].pos);
+    m_adajacentList[6][7] = Distance(m_nodes[6].pos, m_nodes[7].pos);
+    m_adajacentList[7][12] = Distance(m_nodes[7].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = Distance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = Distance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = Distance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = Distance(m_nodes[31].pos, m_nodes[5].pos);
+
+    //Nha Tho Duc Ba -> Dinh Doc Lap
+    //Route 1:
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][32] = Distance(m_nodes[12].pos, m_nodes[32].pos);
+    m_adajacentList[32][33] = Distance(m_nodes[32].pos, m_nodes[33].pos);
+    m_adajacentList[33][34] = Distance(m_nodes[33].pos, m_nodes[34].pos);
+    m_adajacentList[34][0] = Distance(m_nodes[34].pos, m_nodes[0].pos);
+    //Route 2:
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][13] = Distance(m_nodes[12].pos, m_nodes[13].pos);
+    m_adajacentList[13][35] = Distance(m_nodes[13].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = Distance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][37] = Distance(m_nodes[36].pos, m_nodes[37].pos);
+    m_adajacentList[37][34] = Distance(m_nodes[37].pos, m_nodes[34].pos);
+    m_adajacentList[34][0] = Distance(m_nodes[34].pos, m_nodes[0].pos);
+    //Nha Tho Duc Ba -> Buu Dien Trung Tam
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][13] = Distance(m_nodes[12].pos, m_nodes[13].pos);
+    m_adajacentList[13][2] = Distance(m_nodes[13].pos, m_nodes[2].pos);
+    //Nha Tho Duc Ba -> Cho Ben Thanh
+    //Route 1:
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][15] = Distance(m_nodes[12].pos, m_nodes[15].pos);
+    m_adajacentList[15][16] = Distance(m_nodes[15].pos, m_nodes[16].pos);
+    m_adajacentList[16][17] = Distance(m_nodes[16].pos, m_nodes[17].pos);
+    m_adajacentList[17][18] = Distance(m_nodes[17].pos, m_nodes[18].pos);
+    m_adajacentList[18][19] = Distance(m_nodes[18].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = Distance(m_nodes[19].pos, m_nodes[3].pos);
+    //Route 2:
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = Distance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = Distance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = Distance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][38] = Distance(m_nodes[31].pos, m_nodes[38].pos);
+    m_adajacentList[38][19] = Distance(m_nodes[38].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = Distance(m_nodes[19].pos, m_nodes[3].pos);
+    //Nha Tho Duc Ba -> Bitexco Financial Tower
+ //Route 1:
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = Distance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = Distance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = Distance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = Distance(m_nodes[31].pos, m_nodes[5].pos);
+    m_adajacentList[5][24] = Distance(m_nodes[5].pos, m_nodes[24].pos);
+    m_adajacentList[24][4] = Distance(m_nodes[24].pos, m_nodes[4].pos);
+    //Route 2:
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][15] = Distance(m_nodes[12].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = Distance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][25] = Distance(m_nodes[22].pos, m_nodes[25].pos);
+    m_adajacentList[25][26] = Distance(m_nodes[25].pos, m_nodes[26].pos);
+    m_adajacentList[26][27] = Distance(m_nodes[26].pos, m_nodes[27].pos);
+    m_adajacentList[27][28] = Distance(m_nodes[27].pos, m_nodes[28].pos);
+    m_adajacentList[28][4] = Distance(m_nodes[28].pos, m_nodes[4].pos);
+    //Nha Tho Duc Ba -> Pho di bo Nguyen Hue
+    //Route 1:
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = Distance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = Distance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = Distance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = Distance(m_nodes[31].pos, m_nodes[5].pos);
+
+    //Buu Dien Trung Tam -> Dinh Doc Lap
+    //Route 1:
+    m_adajacentList[2][35] = Distance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = Distance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][37] = Distance(m_nodes[36].pos, m_nodes[37].pos);
+    m_adajacentList[37][34] = Distance(m_nodes[37].pos, m_nodes[34].pos);
+    m_adajacentList[34][0] = Distance(m_nodes[34].pos, m_nodes[0].pos);
+    //Route 2:
+    m_adajacentList[2][35] = Distance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = Distance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][6] = Distance(m_nodes[36].pos, m_nodes[6].pos);
+    m_adajacentList[6][39] = Distance(m_nodes[6].pos, m_nodes[39].pos);
+    m_adajacentList[39][33] = Distance(m_nodes[39].pos, m_nodes[33].pos);
+    m_adajacentList[33][34] = Distance(m_nodes[33].pos, m_nodes[34].pos);
+    m_adajacentList[34][0] = Distance(m_nodes[34].pos, m_nodes[0].pos);
+    //Buu Dien Trung Tam -> Nha Tho Duc Ba
+    m_adajacentList[2][35] = Distance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = Distance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][40] = Distance(m_nodes[36].pos, m_nodes[40].pos);
+    m_adajacentList[40][1] = Distance(m_nodes[40].pos, m_nodes[1].pos);
+    //Buu Dien Trung Tam -> Cho Ben Thanh
+    m_adajacentList[2][35] = Distance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = Distance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][40] = Distance(m_nodes[36].pos, m_nodes[40].pos);
+    m_adajacentList[40][6] = Distance(m_nodes[40].pos, m_nodes[6].pos);
+    m_adajacentList[6][0] = Distance(m_nodes[6].pos, m_nodes[0].pos);
+    m_adajacentList[0][15] = Distance(m_nodes[0].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = Distance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][41] = Distance(m_nodes[22].pos, m_nodes[41].pos);
+    m_adajacentList[41][38] = Distance(m_nodes[41].pos, m_nodes[38].pos);
+    m_adajacentList[38][18] = Distance(m_nodes[38].pos, m_nodes[18].pos);
+    m_adajacentList[18][19] = Distance(m_nodes[18].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = Distance(m_nodes[19].pos, m_nodes[3].pos);
+    //Buu Dien Trung Tam -> Bitexco Financial Tower
+    m_adajacentList[2][35] = Distance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = Distance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][40] = Distance(m_nodes[36].pos, m_nodes[40].pos);
+    m_adajacentList[40][1] = Distance(m_nodes[40].pos, m_nodes[1].pos);
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = Distance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = Distance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = Distance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = Distance(m_nodes[31].pos, m_nodes[5].pos);
+    m_adajacentList[5][24] = Distance(m_nodes[5].pos, m_nodes[24].pos);
+    m_adajacentList[24][4] = Distance(m_nodes[24].pos, m_nodes[4].pos);
+    //Buu Dien Trung Tam -> Pho Di Bo Nguyen Hue
+    m_adajacentList[2][35] = Distance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = Distance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][40] = Distance(m_nodes[36].pos, m_nodes[40].pos);
+    m_adajacentList[40][1] = Distance(m_nodes[40].pos, m_nodes[1].pos);
+    m_adajacentList[1][12] = Distance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = Distance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = Distance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = Distance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = Distance(m_nodes[31].pos, m_nodes[5].pos);
+    //Cho Ben Thanh -> Dinh Doc Lap
+ //Route 1:
 }
 
 void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
