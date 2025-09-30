@@ -80,12 +80,25 @@ MapPanel::MapPanel(wxWindow* parent)
     m_nodes.push_back({ wxPoint(513, 394), false, wxEmptyString }); // Node 38
     m_nodes.push_back({ wxPoint(486, 312), false, wxEmptyString }); // Node 39
     m_nodes.push_back({ wxPoint(501, 298), false, wxEmptyString }); // Node 40
-    //
-    m_nodes.push_back({ wxPoint(522, 385), false, wxEmptyString }); // Node 41
-
-
-
-
+    //Cho Ben Thanh -> Dinh Doc Lap
+    //R1
+    m_nodes.push_back({ wxPoint(485, 416), false, wxEmptyString }); // Node 41
+    m_nodes.push_back({ wxPoint(484, 414), false, wxEmptyString }); // Node 42
+    m_nodes.push_back({ wxPoint(465, 427), false, wxEmptyString }); // Node 43
+    m_nodes.push_back({ wxPoint(456, 415), false, wxEmptyString }); // Node 44
+    m_nodes.push_back({ wxPoint(394, 363), false, wxEmptyString }); // Node 45
+    m_nodes.push_back({ wxPoint(448, 306), false, wxEmptyString }); // Node 46
+	//Cho Ben Thanh -> Nha Tho Duc Ba
+    m_nodes.push_back({ wxPoint(500, 440), false, wxEmptyString }); // Node 47
+    m_nodes.push_back({ wxPoint(545, 392), false, wxEmptyString }); // Node 48
+    m_nodes.push_back({ wxPoint(527, 351), false, wxEmptyString }); // Node 49
+    m_nodes.push_back({ wxPoint(495, 320), false, wxEmptyString }); // Node 50
+    m_nodes.push_back({ wxPoint(508, 305), false, wxEmptyString }); // Node 51
+    m_nodes.push_back({ wxPoint(463, 290), false, wxEmptyString }); // Node 52
+    m_nodes.push_back({ wxPoint(592, 430), false, wxEmptyString }); // Node 53
+    m_nodes.push_back({ wxPoint(597, 440), false, wxEmptyString }); // Node 54
+    m_nodes.push_back({ wxPoint(595, 445), false, wxEmptyString }); // Node 55
+    m_nodes.push_back({ wxPoint(605, 417), false, wxEmptyString }); // Node 56
     // Tạo đồ thị từ các node
     CreateGraph();
 
@@ -468,7 +481,47 @@ void MapPanel::CreateGraph() {
     m_adajacentList[30][31] = Distance(m_nodes[30].pos, m_nodes[31].pos);
     m_adajacentList[31][5] = Distance(m_nodes[31].pos, m_nodes[5].pos);
     //Cho Ben Thanh -> Dinh Doc Lap
- //Route 1:
+    m_adajacentList[3][41] = Distance(m_nodes[3].pos, m_nodes[41].pos);
+    m_adajacentList[41][42] = Distance(m_nodes[41].pos, m_nodes[42].pos);
+    m_adajacentList[42][43] = Distance(m_nodes[42].pos, m_nodes[43].pos);
+    m_adajacentList[43][44] = Distance(m_nodes[43].pos, m_nodes[44].pos);
+    m_adajacentList[44][45] = Distance(m_nodes[44].pos, m_nodes[45].pos);
+    m_adajacentList[45][46] = Distance(m_nodes[45].pos, m_nodes[46].pos);
+    m_adajacentList[46][0] = Distance(m_nodes[46].pos, m_nodes[0].pos);
+	//Cho Ben Thanh -> Nha Tho Duc Ba
+    m_adajacentList[3][47] = Distance(m_nodes[3].pos, m_nodes[47].pos);
+    m_adajacentList[47][48] = Distance(m_nodes[47].pos, m_nodes[48].pos);
+    m_adajacentList[48][49] = Distance(m_nodes[48].pos, m_nodes[49].pos);
+    m_adajacentList[49][50] = Distance(m_nodes[49].pos, m_nodes[50].pos);
+    m_adajacentList[50][51] = Distance(m_nodes[50].pos, m_nodes[51].pos);
+    m_adajacentList[51][1] = Distance(m_nodes[51].pos, m_nodes[1].pos);
+    //Cho Ben Thanh -> Pho Di Bo Nguyen Hue
+    m_adajacentList[3][47] = Distance(m_nodes[3].pos, m_nodes[47].pos);
+    m_adajacentList[47][48] = Distance(m_nodes[47].pos, m_nodes[48].pos);
+    m_adajacentList[48][5] = Distance(m_nodes[48].pos, m_nodes[5].pos);
+	//Cho Ben Thanh -> Bitexco Financial Tower
+	//Cho Ben Thanh -> Buu Dien Trung Tam
+	//PDBNH-> Dinh Doc Lap
+    m_adajacentList[5][48] = Distance(m_nodes[5].pos, m_nodes[48].pos);
+    m_adajacentList[48][49] = Distance(m_nodes[48].pos, m_nodes[49].pos);
+    m_adajacentList[49][50] = Distance(m_nodes[49].pos, m_nodes[50].pos);
+	m_adajacentList[50][52] = Distance(m_nodes[50].pos, m_nodes[52].pos);
+    m_adajacentList[52][46] = Distance(m_nodes[52].pos, m_nodes[46].pos);
+	m_adajacentList[46][0] = Distance(m_nodes[46].pos, m_nodes[0].pos);
+	//PDBNH -> Cho Ben Thanh
+    m_adajacentList[5][48] = Distance(m_nodes[5].pos, m_nodes[48].pos);
+    m_adajacentList[48][47] = Distance(m_nodes[48].pos, m_nodes[47].pos);
+    m_adajacentList[47][3] = Distance(m_nodes[47].pos, m_nodes[3].pos);
+    //Bitexco -> Dinh Doc Lap
+    m_adajacentList[4][53] = Distance(m_nodes[4].pos, m_nodes[53].pos);
+    m_adajacentList[53][54] = Distance(m_nodes[53].pos, m_nodes[54].pos);
+    m_adajacentList[54][55] = Distance(m_nodes[54].pos, m_nodes[55].pos);
+    m_adajacentList[55][47] = Distance(m_nodes[55].pos, m_nodes[47].pos);
+    m_adajacentList[47][3] = Distance(m_nodes[47].pos, m_nodes[3].pos);
+    //Bitexco -> PDBNH
+    m_adajacentList[4][56] = Distance(m_nodes[4].pos, m_nodes[56].pos);
+    m_adajacentList[56][5] = Distance(m_nodes[56].pos, m_nodes[5].pos);
+
 }
 
 void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
