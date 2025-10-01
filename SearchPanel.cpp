@@ -6,6 +6,7 @@
 #include <wx/log.h>
 #include <wx/stattext.h>
 #include <wx/button.h>
+#include <wx/statbmp.h> // Thêm thư viện để sử dụng wxStaticBitmap
 
 using namespace std;
 
@@ -33,14 +34,57 @@ void SearchPanel::SetupModernUI()
 
 void SearchPanel::CreateSearchSection(wxBoxSizer* mainSizer)
 {
-    // Title
-    wxStaticText* title = new wxStaticText(this, wxID_ANY, _T("Tìm đường đi"));
-    wxFont titleFont = title->GetFont();
-    titleFont.SetPointSize(16);
-    titleFont.SetWeight(wxFONTWEIGHT_BOLD);
-    titleFont.SetFaceName("Segoe UI");
-    title->SetFont(titleFont);
-    title->SetForegroundColour(ModernColors::TEXT_PRIMARY);
+    // --- BẮT ĐẦU THAY ĐỔI ---
+
+    // Sizer cho phần header (logo và nút info)
+    wxBoxSizer* headerSizer = new wxBoxSizer(wxHORIZONTAL);
+
+    // 1. Tải và hiển thị logo Grab
+    wxImage logoImage("grab_logo.png", wxBITMAP_TYPE_PNG);
+    if (logoImage.IsOk()) {
+        // Thay đổi kích thước logo cho phù hợp (chiều cao 35px)
+        int newHeight = 35;
+        int newWidth = logoImage.GetWidth() * newHeight / logoImage.GetHeight();
+        logoImage.Rescale(newWidth, newHeight, wxIMAGE_QUALITY_HIGH);
+
+        wxStaticBitmap* logoBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(logoImage));
+        headerSizer->Add(logoBitmap, 0, wxALIGN_CENTER_VERTICAL);
+    }
+    else {
+        // Nếu không tìm thấy file ảnh, hiển thị chữ thay thế
+        wxStaticText* title = new wxStaticText(this, wxID_ANY, _T("Grab Routes"));
+        wxFont titleFont = title->GetFont();
+        titleFont.SetPointSize(16);
+        titleFont.SetWeight(wxFONTWEIGHT_BOLD);
+        titleFont.SetFaceName("Segoe UI");
+        title->SetFont(titleFont);
+        title->SetForegroundColour(ModernColors::TEXT_PRIMARY);
+        headerSizer->Add(title, 1, wxALIGN_CENTER_VERTICAL);
+    }
+
+    // Thêm một khoảng trống co giãn để đẩy nút info sang phải
+    headerSizer->AddStretchSpacer(1);
+
+    // 2. Tạo nút thông tin thành viên nhóm
+    wxButton* infoButton = new wxButton(this, wxID_ANY, wxT("i"), wxDefaultPosition, wxSize(30, 30));
+    infoButton->SetFont(infoButton->GetFont().Bold());
+    infoButton->SetBackgroundColour(ModernColors::BACKGROUND_INPUT);
+    infoButton->SetForegroundColour(ModernColors::TEXT_SECONDARY);
+
+    // Tạo nội dung tooltip (bạn hãy thay bằng thông tin nhóm mình)
+    wxString memberInfo =
+        "--- THÀNH VIÊN NHÓM ---\n\n"
+        "1. Lý Trần Gia Khang - MSSV: 24110098\n"
+        "2. Đoàn Trọng Trung - MSSV: 24110140\n"
+        "3. Khổng Đình Tú - MSSV: 24110145";
+    infoButton->SetToolTip(memberInfo);
+
+    headerSizer->Add(infoButton, 0, wxALIGN_CENTER_VERTICAL);
+
+    // Thêm headerSizer vào sizer chính
+    mainSizer->Add(headerSizer, 0, wxEXPAND | wxALL, 16);
+
+    // --- KẾT THÚC THAY ĐỔI ---
 
     // Input fields container
     wxBoxSizer* inputSizer = new wxBoxSizer(wxVERTICAL);
@@ -71,9 +115,8 @@ void SearchPanel::CreateSearchSection(wxBoxSizer* mainSizer)
     inputSizer->Add(endLabel, 0, wxBOTTOM, 4);
     inputSizer->Add(m_endPointCtrl, 0, wxEXPAND, 0);
 
-	// thêm vào main sizer
-    mainSizer->Add(title, 0, wxALL, 16);
-    mainSizer->Add(inputSizer, 0, wxEXPAND | wxLEFT | wxRIGHT, 16);
+    // Thêm input sizer vào main sizer (chú ý bỏ padding top)
+    mainSizer->Add(inputSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 16);
 }
 
 void SearchPanel::CreateButtonSection(wxBoxSizer* mainSizer)
@@ -115,7 +158,7 @@ void SearchPanel::CreateButtonSection(wxBoxSizer* mainSizer)
 
 void SearchPanel::CreateSavedPlacesSection(wxBoxSizer* mainSizer)
 {
-	// Section title
+    // Section title
     wxStaticText* placesTitle = new wxStaticText(this, wxID_ANY, _T("Địa điểm đã lưu"));
     wxFont titleFont = placesTitle->GetFont();
     titleFont.SetPointSize(12);
@@ -196,7 +239,7 @@ void SearchPanel::SetMapPanel(MapPanel* mapPanel)
 
 void SearchPanel::OnSearchClicked(wxCommandEvent& event)
 {
-	// Clear all the paths before searching
+    // Clear all the paths before searching
     m_mapPanel->ClearAllPaths();
 
     if (!m_mapPanel) {
