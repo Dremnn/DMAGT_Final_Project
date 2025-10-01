@@ -6,7 +6,8 @@
 #include <wx/log.h>
 #include <wx/stattext.h>
 #include <wx/button.h>
-#include <wx/statbmp.h> // Thêm thư viện để sử dụng wxStaticBitmap
+#include <wx/statbmp.h>
+#include <wx/popupwin.h> // Thêm thư viện cho wxPopupWindow
 
 using namespace std;
 
@@ -18,40 +19,27 @@ SearchPanel::SearchPanel(wxWindow* parent)
 
 void SearchPanel::SetupModernUI()
 {
-    // Set modern background color
     SetBackgroundColour(ModernColors::BACKGROUND_CARD);
-
-    // Create main vertical layout with modern spacing
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
-
-    // Add sections
     CreateSearchSection(mainSizer);
     CreateButtonSection(mainSizer);
     CreateSavedPlacesSection(mainSizer);
-
     SetSizer(mainSizer);
 }
 
 void SearchPanel::CreateSearchSection(wxBoxSizer* mainSizer)
 {
-    // --- BẮT ĐẦU THAY ĐỔI ---
-
-    // Sizer cho phần header (logo và nút info)
     wxBoxSizer* headerSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    // 1. Tải và hiển thị logo Grab
     wxImage logoImage("grab_logo.png", wxBITMAP_TYPE_PNG);
     if (logoImage.IsOk()) {
-        // Thay đổi kích thước logo cho phù hợp (chiều cao 35px)
         int newHeight = 35;
         int newWidth = logoImage.GetWidth() * newHeight / logoImage.GetHeight();
         logoImage.Rescale(newWidth, newHeight, wxIMAGE_QUALITY_HIGH);
-
         wxStaticBitmap* logoBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(logoImage));
         headerSizer->Add(logoBitmap, 0, wxALIGN_CENTER_VERTICAL);
     }
     else {
-        // Nếu không tìm thấy file ảnh, hiển thị chữ thay thế
         wxStaticText* title = new wxStaticText(this, wxID_ANY, _T("Grab Routes"));
         wxFont titleFont = title->GetFont();
         titleFont.SetPointSize(16);
@@ -62,34 +50,28 @@ void SearchPanel::CreateSearchSection(wxBoxSizer* mainSizer)
         headerSizer->Add(title, 1, wxALIGN_CENTER_VERTICAL);
     }
 
-    // Thêm một khoảng trống co giãn để đẩy nút info sang phải
     headerSizer->AddStretchSpacer(1);
 
-    // 2. Tạo nút thông tin thành viên nhóm
-    wxButton* infoButton = new wxButton(this, wxID_ANY, wxT("i"), wxDefaultPosition, wxSize(30, 30));
-    infoButton->SetFont(infoButton->GetFont().Bold());
-    infoButton->SetBackgroundColour(ModernColors::BACKGROUND_INPUT);
-    infoButton->SetForegroundColour(ModernColors::TEXT_SECONDARY);
+    // --- BẮT ĐẦU THAY ĐỔI ---
 
-    // Tạo nội dung tooltip (bạn hãy thay bằng thông tin nhóm mình)
-    wxString memberInfo =
-        "--- THÀNH VIÊN NHÓM ---\n\n"
-        "1. Lý Trần Gia Khang - MSSV: 24110098\n"
-        "2. Đoàn Trọng Trung - MSSV: 24110140\n"
-        "3. Khổng Đình Tú - MSSV: 24110145";
-    infoButton->SetToolTip(memberInfo);
+    // Sử dụng biến thành viên m_infoButton
+    m_infoButton = new wxButton(this, wxID_ANY, wxT("i"), wxDefaultPosition, wxSize(30, 30));
+    m_infoButton->SetFont(m_infoButton->GetFont().Bold());
+    m_infoButton->SetBackgroundColour(ModernColors::BACKGROUND_INPUT);
+    m_infoButton->SetForegroundColour(ModernColors::TEXT_SECONDARY);
 
-    headerSizer->Add(infoButton, 0, wxALIGN_CENTER_VERTICAL);
-
-    // Thêm headerSizer vào sizer chính
-    mainSizer->Add(headerSizer, 0, wxEXPAND | wxALL, 16);
+    // Xóa SetToolTip và thay bằng bind sự kiện hover
+    // m_infoButton->SetToolTip(memberInfo); // Dòng này bị xóa
+    m_infoButton->Bind(wxEVT_ENTER_WINDOW, &SearchPanel::OnInfoButtonEnter, this);
+    m_infoButton->Bind(wxEVT_LEAVE_WINDOW, &SearchPanel::OnInfoButtonLeave, this);
 
     // --- KẾT THÚC THAY ĐỔI ---
 
-    // Input fields container
+    headerSizer->Add(m_infoButton, 0, wxALIGN_CENTER_VERTICAL);
+    mainSizer->Add(headerSizer, 0, wxEXPAND | wxALL, 16);
+
     wxBoxSizer* inputSizer = new wxBoxSizer(wxVERTICAL);
 
-    // Start point input
     wxStaticText* startLabel = new wxStaticText(this, wxID_ANY, _T("Điểm đi:"));
     SimpleUIHelper::SetModernFont(startLabel);
     startLabel->SetForegroundColour(ModernColors::TEXT_SECONDARY);
@@ -99,7 +81,6 @@ void SearchPanel::CreateSearchSection(wxBoxSizer* mainSizer)
     m_startPointCtrl->SetHint(_T("Nhập điểm đi"));
     SimpleUIHelper::StyleTextCtrl(m_startPointCtrl);
 
-    // End point input
     wxStaticText* endLabel = new wxStaticText(this, wxID_ANY, _T("Điểm đến:"));
     SimpleUIHelper::SetModernFont(endLabel);
     endLabel->SetForegroundColour(ModernColors::TEXT_SECONDARY);
@@ -109,16 +90,15 @@ void SearchPanel::CreateSearchSection(wxBoxSizer* mainSizer)
     m_endPointCtrl->SetHint(_T("Nhập điểm đến"));
     SimpleUIHelper::StyleTextCtrl(m_endPointCtrl);
 
-    // Layout input
     inputSizer->Add(startLabel, 0, wxBOTTOM, 4);
     inputSizer->Add(m_startPointCtrl, 0, wxEXPAND | wxBOTTOM, 12);
     inputSizer->Add(endLabel, 0, wxBOTTOM, 4);
     inputSizer->Add(m_endPointCtrl, 0, wxEXPAND, 0);
 
-    // Thêm input sizer vào main sizer (chú ý bỏ padding top)
     mainSizer->Add(inputSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 16);
 }
 
+// ... (Các hàm CreateButtonSection, CreateSavedPlacesSection, SetMapPanel, ... giữ nguyên)
 void SearchPanel::CreateButtonSection(wxBoxSizer* mainSizer)
 {
     wxBoxSizer* buttonSizer = new wxBoxSizer(wxVERTICAL);
@@ -318,4 +298,58 @@ void SearchPanel::OnClearClicked(wxCommandEvent& event)
     // Clear input fields
     m_startPointCtrl->Clear();
     m_endPointCtrl->Clear();
+}
+
+// --- CÁC HÀM XỬ LÝ POPUP MỚI ---
+void SearchPanel::OnInfoButtonEnter(wxMouseEvent& event)
+{
+    // Hủy popup cũ nếu có để tránh trùng lặp
+    if (m_infoPopup) {
+        m_infoPopup->Destroy();
+        m_infoPopup = nullptr;
+    }
+
+    // Tạo cửa sổ popup mới
+    m_infoPopup = new wxPopupWindow(this, wxBORDER_SIMPLE);
+    m_infoPopup->SetBackgroundColour(ModernColors::BACKGROUND_CARD);
+
+    // Tạo nội dung text cho popup
+    wxString memberInfo =
+        _T("THÀNH VIÊN NHÓM\n")
+        _T("1. Lý Trần Gia Khang - MSSV: 24110098\n")
+        _T("2. Đoàn Trọng Trung - MSSV: 24110140\n")
+        _T("3. Khổng Đình Tú - MSSV: 24110145");
+
+    wxStaticText* infoText = new wxStaticText(m_infoPopup, wxID_ANY, memberInfo);
+    infoText->SetForegroundColour(ModernColors::TEXT_PRIMARY);
+
+    // **QUAN TRỌNG: Set font Unicode để hiển thị tiếng Việt**
+    wxFont font(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Segoe UI");
+    infoText->SetFont(font);
+
+    // Tự động điều chỉnh kích thước popup cho vừa với nội dung
+    wxSize bestSize = infoText->GetBestSize();
+    m_infoPopup->SetSize(bestSize.GetWidth() + 20, bestSize.GetHeight() + 20); // Thêm padding
+
+    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(infoText, 1, wxEXPAND | wxALL, 10);
+    m_infoPopup->SetSizer(sizer);
+
+    // Tính toán vị trí hiển thị popup (bên phải nút "i")
+    wxPoint pos = m_infoButton->ClientToScreen(wxPoint(0, 0));
+    wxSize btnSize = m_infoButton->GetSize();
+    pos.x += btnSize.GetWidth() + 5; // Cách nút 5px
+    pos.y -= (m_infoPopup->GetSize().GetHeight() - btnSize.GetHeight()) / 2; // Canh giữa theo chiều dọc
+
+    m_infoPopup->SetPosition(pos);
+    m_infoPopup->Show();
+}
+
+void SearchPanel::OnInfoButtonLeave(wxMouseEvent& event)
+{
+    // Nếu có popup đang hiển thị thì hủy nó đi
+    if (m_infoPopup) {
+        m_infoPopup->Destroy();
+        m_infoPopup = nullptr;
+    }
 }

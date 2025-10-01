@@ -3,7 +3,9 @@
 #include <wx/scrolwin.h>
 #include <wx/statline.h>
 
+// Forward declaration
 class MapPanel;
+class wxPopupWindow; // Thêm forward declaration cho popup
 
 class SearchPanel : public wxPanel
 {
@@ -16,6 +18,11 @@ private:
     wxTextCtrl* m_endPointCtrl;
     MapPanel* m_mapPanel = nullptr;
 
+    // --- BẮT ĐẦU THAY ĐỔI ---
+    wxButton* m_infoButton = nullptr;           // Đưa nút info ra làm biến thành viên
+    wxPopupWindow* m_infoPopup = nullptr;   // Cửa sổ popup tùy chỉnh
+    // --- KẾT THÚC THAY ĐỔI ---
+
     // UI setup methods
     void SetupModernUI();
     void CreateSearchSection(wxBoxSizer* mainSizer);
@@ -26,4 +33,10 @@ private:
     void OnSearchClicked(wxCommandEvent& event);
     void OnShowAllPathsClicked(wxCommandEvent& event);
     void OnClearClicked(wxCommandEvent& event);
+
+    // --- BẮT ĐẦU THAY ĐỔI ---
+    // Sự kiện di chuột vào/ra khỏi nút info
+    void OnInfoButtonEnter(wxMouseEvent& event);
+    void OnInfoButtonLeave(wxMouseEvent& event);
+    // --- KẾT THÚC THAY ĐỔI ---
 };
