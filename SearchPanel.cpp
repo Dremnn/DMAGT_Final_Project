@@ -33,7 +33,7 @@ void SearchPanel::CreateSearchSection(wxBoxSizer* mainSizer)
 
     wxImage logoImage("grab_logo.png", wxBITMAP_TYPE_PNG);
     if (logoImage.IsOk()) {
-        int newHeight = 35;
+        int newHeight = 100;
         int newWidth = logoImage.GetWidth() * newHeight / logoImage.GetHeight();
         logoImage.Rescale(newWidth, newHeight, wxIMAGE_QUALITY_HIGH);
         wxStaticBitmap* logoBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(logoImage));

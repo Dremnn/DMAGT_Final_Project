@@ -119,6 +119,8 @@ MapPanel::MapPanel(wxWindow* parent)
     Bind(wxEVT_MOTION, &MapPanel::OnMouseMove, this);
     Bind(wxEVT_LEFT_UP, &MapPanel::OnLeftUp, this);
 
+    CreateZoomButtons();
+
     // Cập nhật bitmap đã co giãn lần đầu
     UpdateScaledBitmap();
 }
@@ -940,5 +942,105 @@ void MapPanel::OnSize(wxSizeEvent& event)
     // Cập nhật scaled bitmap khi resize
     UpdateScaledBitmap();
 
+    UpdateZoomButtonsPosition();
+
     event.Skip();
+}
+
+void MapPanel::CreateZoomButtons()
+{
+    // Nút Zoom In (+)
+    m_zoomInButton = new wxButton(this, wxID_ANY, wxT("+"),
+        wxDefaultPosition, wxSize(30, 30));
+    m_zoomInButton->SetBackgroundColour(ModernColors::PRIMARY_GREEN);
+    m_zoomInButton->SetForegroundColour(ModernColors::TEXT_WHITE);
+    wxFont buttonFont = m_zoomInButton->GetFont();
+    buttonFont.SetPointSize(14);
+    buttonFont.SetWeight(wxFONTWEIGHT_BOLD);
+    m_zoomInButton->SetFont(buttonFont);
+    m_zoomInButton->Bind(wxEVT_BUTTON, &MapPanel::OnZoomInClicked, this);
+
+    // Nút Zoom Out (-)
+    m_zoomOutButton = new wxButton(this, wxID_ANY, wxT("-"),
+        wxDefaultPosition, wxSize(30, 30));
+    m_zoomOutButton->SetBackgroundColour(ModernColors::PRIMARY_GREEN);
+    m_zoomOutButton->SetForegroundColour(ModernColors::TEXT_WHITE);
+    m_zoomOutButton->SetFont(buttonFont);
+    m_zoomOutButton->Bind(wxEVT_BUTTON, &MapPanel::OnZoomOutClicked, this);
+
+    // Đặt vị trí ban đầu
+    UpdateZoomButtonsPosition();
+}
+
+void MapPanel::UpdateZoomButtonsPosition()
+{
+    if (!m_zoomInButton || !m_zoomOutButton) return;
+
+    wxSize panelSize = GetSize();
+    int buttonSize = 30;
+    int margin = 10;
+    int spacing = 5;
+
+    // Vị trí góc dưới phải
+    int x = panelSize.x - buttonSize - margin;
+    int yPlus = panelSize.y - (buttonSize * 2) - spacing - margin;
+    int yMinus = panelSize.y - buttonSize - margin;
+
+    m_zoomInButton->SetPosition(wxPoint(x, yPlus));
+    m_zoomOutButton->SetPosition(wxPoint(x, yMinus));
+}
+
+void MapPanel::OnZoomInClicked(wxCommandEvent& event)
+{
+    // Zoom in với tâm ở giữa màn hình
+    wxSize panelSize = GetSize();
+    wxPoint centerPos(panelSize.x / 2, panelSize.y / 2);
+
+    double oldScale = m_scale;
+    double zoomFactor = 1.15; // Zoom 15% mỗi lần click
+    m_scale *= zoomFactor;
+
+    // Giới hạn scale tối đa
+    if (m_scale > 2.36) m_scale = 2.36;
+
+    // Điều chỉnh offset để zoom tại trung tâm
+    wxPoint worldPos = wxPoint(
+        static_cast<int>((centerPos.x - m_offset.x) / oldScale),
+        static_cast<int>((centerPos.y - m_offset.y) / oldScale)
+    );
+
+    m_offset.x = centerPos.x - worldPos.x * m_scale;
+    m_offset.y = centerPos.y - worldPos.y * m_scale;
+
+    UpdateScaledBitmap();
+    Refresh();
+}
+
+void MapPanel::OnZoomOutClicked(wxCommandEvent& event)
+{
+    // Zoom out với tâm ở giữa màn hình
+    wxSize panelSize = GetSize();
+    wxPoint centerPos(panelSize.x / 2, panelSize.y / 2);
+
+    double oldScale = m_scale;
+    double zoomFactor = 0.87; // Zoom out 13% mỗi lần click (1/1.15 ≈ 0.87)
+    m_scale *= zoomFactor;
+
+    // Giới hạn scale tối thiểu
+    wxSize bitmapSize = m_mapBitmap.GetSize();
+    double minScale = min(static_cast<double>(panelSize.x) / bitmapSize.x,
+        static_cast<double>(panelSize.y) / bitmapSize.y);
+    if (m_scale < minScale) m_scale = minScale;
+
+    // Điều chỉnh offset để zoom tại trung tâm
+    wxPoint worldPos = wxPoint(
+        static_cast<int>((centerPos.x - m_offset.x) / oldScale),
+        static_cast<int>((centerPos.y - m_offset.y) / oldScale)
+    );
+
+    m_offset.x = centerPos.x - worldPos.x * m_scale;
+    m_offset.y = centerPos.y - worldPos.y * m_scale;
+
+    UpdateScaledBitmap();
+    Refresh();
 }

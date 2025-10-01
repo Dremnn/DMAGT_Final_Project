@@ -51,6 +51,11 @@ private:
     bool m_showRouteInfo = false;
     bool m_isExpanded = true;               // Trạng thái mở rộng/thu gọn
     wxTimer* m_slideTimer = nullptr;
+
+    // Zoom buttons
+    wxButton* m_zoomInButton = nullptr;
+    wxButton* m_zoomOutButton = nullptr;
+
     int m_popupHeight = 120;               // Chiều cao khi mở rộng
     int m_collapsedHeight = 40;            // Chiều cao khi thu gọn (chỉ hiện nút)
     int m_currentHeight = 0;               // Chiều cao hiện tại
@@ -77,6 +82,12 @@ private:
     void ExpandPopup();                           // Mở rộng popup
     void CollapsePopup();                         // Thu gọn popup
     void UpdateToggleButtonText();                // Cập nhật text nút toggle
+
+    // Zoom button methods
+    void CreateZoomButtons();
+    void UpdateZoomButtonsPosition();
+    void OnZoomInClicked(wxCommandEvent& event);
+    void OnZoomOutClicked(wxCommandEvent& event);
 
     // Event handlers
     void OnPaint(wxPaintEvent& event);
