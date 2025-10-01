@@ -453,7 +453,9 @@ void MapPanel::CreateGraph() {
     m_adajacentList[6][0] = Distance(m_nodes[6].pos, m_nodes[0].pos);
     m_adajacentList[0][15] = Distance(m_nodes[0].pos, m_nodes[15].pos);
     m_adajacentList[15][22] = Distance(m_nodes[15].pos, m_nodes[22].pos);
-    m_adajacentList[22][41] = Distance(m_nodes[22].pos, m_nodes[41].pos);
+    m_adajacentList[22][17] = Distance(m_nodes[22].pos, m_nodes[17].pos);
+    m_adajacentList[17][18] = Distance(m_nodes[17].pos, m_nodes[18].pos);
+    m_adajacentList[18][41] = Distance(m_nodes[18].pos, m_nodes[41].pos);
     m_adajacentList[41][38] = Distance(m_nodes[41].pos, m_nodes[38].pos);
     m_adajacentList[38][18] = Distance(m_nodes[38].pos, m_nodes[18].pos);
     m_adajacentList[18][19] = Distance(m_nodes[18].pos, m_nodes[19].pos);
