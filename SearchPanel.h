@@ -19,8 +19,8 @@ private:
     MapPanel* m_mapPanel = nullptr;
 
     // --- BẮT ĐẦU THAY ĐỔI ---
-    wxButton* m_infoButton = nullptr;           // Đưa nút info ra làm biến thành viên
-    wxPopupWindow* m_infoPopup = nullptr;   // Cửa sổ popup tùy chỉnh
+    wxButton* m_infoButton = nullptr;
+    wxPopupWindow* m_infoPopup = nullptr;
     // --- KẾT THÚC THAY ĐỔI ---
 
     // UI setup methods
