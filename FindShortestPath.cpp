@@ -1,31 +1,33 @@
 ﻿#include "FindShortestPath.h"
 #include "MapPanel.h" 
 
+using namespace std;
+
 // Hàm tính khoảng cách Euclidean giữa hai điểm
-double Distance(const wxPoint& p1, const wxPoint& p2) {
-    double pixelDistance = std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
+double caculateDistance(const wxPoint& p1, const wxPoint& p2) {
+    double pixelDistance = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
     return pixelDistance * 6.565; // Trả về khoảng cách thực tế tính bằng mét
 }
 
-// Thuật toán Dijkstra tìm đường đi ngắn nhất
-std::vector<std::pair<int, int>> Dijkstra(
-    int startNodeIndex,
-    int endNodeIndex,
-    const std::vector<MapNode>& nodes,
-    const std::map<int, std::map<int, double>>& graph)
+// Hàm tìm đường đi ngắn nhất bằng Dijkstra
+vector<pair<int, int>> findShortestPath(
+    int first,
+    int last,
+    const vector<MapNode>& nodes,               // mảng lưu các node
+    const map<int, map<int, double>>& graph)    // đồ thị ma trận kề
 {
-    std::vector<std::pair<int, int>> shortestPath;
-    std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::greater<std::pair<double, int>>> pq;
-    std::map<int, double> distances;
-    std::map<int, int> previousNodes;
+    vector<pair<int, int>> shortestPath;
+    priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> pq;
+    map<int, double> distances;
+    map<int, int> previousNodes;
 
     for (size_t i = 0; i < nodes.size(); ++i) {
-        distances[i] = std::numeric_limits<double>::infinity();
+        distances[i] = INFINITY;
         previousNodes[i] = -1;
     }
 
-    distances[startNodeIndex] = 0;
-    pq.push({ 0, startNodeIndex });
+    distances[first] = 0;
+    pq.push({ 0, first });
 
     while (!pq.empty()) {
         double currentDistance = pq.top().first;
@@ -36,7 +38,7 @@ std::vector<std::pair<int, int>> Dijkstra(
             continue;
         }
 
-        if (currentNodeIndex == endNodeIndex) {
+        if (currentNodeIndex == last) {
             break;
         }
 
@@ -54,8 +56,8 @@ std::vector<std::pair<int, int>> Dijkstra(
         }
     }
 
-    if (previousNodes.count(endNodeIndex) && previousNodes.at(endNodeIndex) != -1) {
-        int currentNodeIndex = endNodeIndex;
+    if (previousNodes.count(last) && previousNodes.at(last) != -1) {
+        int currentNodeIndex = last;
         while (currentNodeIndex != -1) {
             int previousNodeIndex = previousNodes.at(currentNodeIndex);
             if (previousNodeIndex != -1) {
@@ -63,7 +65,7 @@ std::vector<std::pair<int, int>> Dijkstra(
             }
             currentNodeIndex = previousNodeIndex;
         }
-        std::reverse(shortestPath.begin(), shortestPath.end());
+        reverse(shortestPath.begin(), shortestPath.end());
     }
 
     return shortestPath;

@@ -11,10 +11,10 @@
 // Forward declaration của struct MapNode để tránh lỗi định nghĩa lại
 struct MapNode;
 
-double Distance(const wxPoint& p1, const wxPoint& p2);
+double caculateDistance(const wxPoint& p1, const wxPoint& p2);
 
 // Hàm tìm đường đi ngắn nhất bằng thuật toán Dijkstra
-std::vector<std::pair<int, int>> Dijkstra(
+std::vector<std::pair<int, int>> findShortestPath(
     int startNodeIndex,
     int endNodeIndex,
     const std::vector<MapNode>& nodes,
