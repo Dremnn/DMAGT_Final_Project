@@ -148,6 +148,9 @@ void SearchPanel::CreateButtonSection(wxBoxSizer* m_sizer)
     wxButton* allPathsButton = new wxButton(this, wxID_ANY, _T("Tất cả đường đi"));
     SimpleUIHelper::StyleButton(allPathsButton, false);
 
+    m_selectRouteButton = new wxButton(this, wxID_ANY, _T("📍 Chọn lộ trình"));
+    SimpleUIHelper::StyleButton(m_selectRouteButton, false);
+
     wxButton* clearButton = new wxButton(this, wxID_ANY, _T("Xóa đường đi"));
     clearButton->SetBackgroundColour(ModernColors::DANGER);
     clearButton->SetForegroundColour(ModernColors::TEXT_WHITE);
@@ -156,6 +159,7 @@ void SearchPanel::CreateButtonSection(wxBoxSizer* m_sizer)
 
     buttonSizer->Add(searchButton, 0, wxEXPAND | wxBOTTOM, 8);
     buttonSizer->Add(allPathsButton, 0, wxEXPAND | wxBOTTOM, 8);
+    buttonSizer->Add(m_selectRouteButton, 0, wxEXPAND | wxBOTTOM, 8);
     buttonSizer->Add(clearButton, 0, wxEXPAND, 0);
 
     wxStaticLine* divider = new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 1), wxLI_HORIZONTAL);
@@ -166,6 +170,7 @@ void SearchPanel::CreateButtonSection(wxBoxSizer* m_sizer)
     //Bind events
     searchButton->Bind(wxEVT_BUTTON, &SearchPanel::OnSearchClicked, this);
     allPathsButton->Bind(wxEVT_BUTTON, &SearchPanel::OnShowAllPathsClicked, this);
+    m_selectRouteButton->Bind(wxEVT_BUTTON, &SearchPanel::OnSelectRouteClicked, this);
     clearButton->Bind(wxEVT_BUTTON, &SearchPanel::OnClearClicked, this);
 }
 
@@ -304,7 +309,52 @@ void SearchPanel::OnShowAllPathsClicked(wxCommandEvent& event) {
 //Process when clicked "Xóa đường đi"
 void SearchPanel::OnClearClicked(wxCommandEvent& event)
 {
-    if (m_mapPanel) m_mapPanel->ClearAllPaths();
+    if (m_mapPanel) {
+        m_mapPanel->ClearAllPaths();
+        m_mapPanel->SetSelectionMode(false);
+    }
+
     m_startPointCtrl->Clear();
     m_endPointCtrl->Clear();
+
+    if (m_isSelectingRoute) {
+        m_isSelectingRoute = false;
+        m_selectRouteButton->SetLabel(_T("📍 Chọn lộ trình"));
+        m_selectRouteButton->SetBackgroundColour(ModernColors::PRIMARY_GREEN);
+        m_selectRouteButton->SetForegroundColour(ModernColors::TEXT_WHITE);
+        m_selectRouteButton->Refresh();
+    }
+}
+
+//Process when clicked "Chọn lộ trình"
+void SearchPanel::OnSelectRouteClicked(wxCommandEvent& event) {
+    if (!m_mapPanel) return;
+
+    m_isSelectingRoute = !m_isSelectingRoute;
+
+    if (m_isSelectingRoute) {
+        m_mapPanel->SetSelectionMode(true);
+        m_selectRouteButton->SetLabel(_T("❌ Hủy chọn"));
+        m_selectRouteButton->SetBackgroundColour(ModernColors::DANGER);
+
+        // Clear input và map
+        m_startPointCtrl->Clear();
+        m_endPointCtrl->Clear();
+    }
+    else {
+        m_mapPanel->SetSelectionMode(false);
+        m_selectRouteButton->SetLabel(_T("📍 Chọn lộ trình"));
+        m_selectRouteButton->SetBackgroundColour(ModernColors::PRIMARY_GREEN);
+    }
+}
+
+void SearchPanel::UpdateRouteSelection(int startIdx, int endIdx) {
+    if (!m_mapPanel) return;
+
+    m_startPointCtrl->SetValue(m_mapPanel->GetNodeNameByIndex(startIdx));
+    m_endPointCtrl->SetValue(m_mapPanel->GetNodeNameByIndex(endIdx));
+
+    m_isSelectingRoute = false;
+    m_selectRouteButton->SetLabel(_T("📍 Chọn lộ trình"));
+    m_selectRouteButton->SetBackgroundColour(ModernColors::PRIMARY_GREEN);
 }

@@ -8,6 +8,7 @@
 // Forward declarations
 struct SimplePath;
 struct ModernColors;
+class SearchPanel;
 
 using namespace std;
 
@@ -24,12 +25,23 @@ public:
     int FindNodeIndexByName(const wxString& name) const;
     void FindAndDrawNewPath(int startIndex, int endIndex);
     void FindAndDrawAllPaths(int startIndex, int endIndex);
+    void SetSelectionMode(bool enable);
+    void ResetSelection();
+    void SetSearchPanel(SearchPanel* panel) { m_searchPanel = panel; }
+    wxString GetNodeNameByIndex(int idx) const {
+        if (idx >= 0 && idx < static_cast<int>(m_nodes.size())) {
+            return m_nodes[idx].name;
+        }
+        return wxEmptyString;
+    }
     void ClearAllPaths();
     void HideRouteInfo();
 
 private:
     wxBitmap m_mapBitmap;
     wxBitmap m_scaledBitmap;
+
+    SearchPanel* m_searchPanel = nullptr;
 
 	// Graph data
     vector<MapNode> m_nodes;
@@ -41,7 +53,10 @@ private:
     bool m_showAllNodes = false;
     set<int> m_activeNodes;
     int m_startNodeIndex = -1;  
-    int m_endNodeIndex = -1;    
+    int m_endNodeIndex = -1;   
+	// Selection mode
+    bool m_selectionMode = false;
+    int m_selectedNode = -1;
 
     // Route info popup
     wxPanel* m_routeInfoPanel = nullptr;
@@ -96,6 +111,7 @@ private:
 	void OnSize(wxSizeEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnLeftDown(wxMouseEvent& event);
+    void HandleNodeSelection(const wxPoint& clickPos);
     void OnMouseMove(wxMouseEvent& event);
     void OnLeftUp(wxMouseEvent& event);
 };

@@ -1,4 +1,5 @@
 ﻿#include "MapPanel.h"
+#include "SearchPanel.h"
 #include "FindShortestPath.h"
 #include "FindAllPaths.h"
 #include "NormalizeString.h"
@@ -566,29 +567,36 @@ void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
     bool isEndNode = (currentIndex == m_endNodeIndex);
 
     if (node.isBigNode) {
-        // Chỉ vẽ node lớn nếu là start hoặc end
-        if (isStartNode) {
-            // Node điểm đi - màu xanh lá
-            dc.SetBrush(wxBrush(ModernColors::PRIMARY_GREEN));
-            dc.SetPen(wxPen(ModernColors::DARK_GREEN, 2));
-            dc.DrawCircle(screenPos, 8);
-        }
-        else if (isEndNode) {
-            // Node điểm đến - màu đỏ
-            dc.SetBrush(wxBrush(ModernColors::DANGER));
-            dc.SetPen(wxPen(wxColor(200, 0, 0), 2));
-            dc.DrawCircle(screenPos, 8);
+        if (m_selectionMode) {
+            // Chế độ chọn: node đã chọn = xanh, chưa chọn = cam
+            if (isStartNode) {
+                dc.SetBrush(wxBrush(ModernColors::PRIMARY_GREEN));
+                dc.SetPen(wxPen(ModernColors::DARK_GREEN, 3));
+                dc.DrawCircle(screenPos, 10);
+            }
+            else {
+                dc.SetBrush(wxBrush(wxColor(255, 165, 0))); // Cam
+                dc.SetPen(wxPen(wxColor(200, 100, 0), 2));
+                dc.DrawCircle(screenPos, 8);
+            }
         }
         else {
-            // Các node lớn khác - vẽ như node nhỏ
-            dc.SetBrush(*wxBLACK_BRUSH);
-            dc.DrawCircle(screenPos, 2);
+            // Chế độ bình thường (giữ nguyên logic cũ)
+            if (isStartNode) {
+                dc.SetBrush(wxBrush(ModernColors::PRIMARY_GREEN));
+                dc.SetPen(wxPen(ModernColors::DARK_GREEN, 2));
+                dc.DrawCircle(screenPos, 8);
+            }
+            else if (isEndNode) {
+                dc.SetBrush(wxBrush(ModernColors::DANGER));
+                dc.SetPen(wxPen(wxColor(200, 0, 0), 2));
+                dc.DrawCircle(screenPos, 8);
+            }
+            else {
+                dc.SetBrush(*wxBLACK_BRUSH);
+                dc.DrawCircle(screenPos, 2);
+            }
         }
-    }
-    else {
-        // Node nhỏ - giữ nguyên
-        dc.SetBrush(*wxBLACK_BRUSH);
-        dc.DrawCircle(screenPos, 2);
     }
 }
 
@@ -670,6 +678,13 @@ void MapPanel::OnMouseWheel(wxMouseEvent& event)
 
 void MapPanel::OnLeftDown(wxMouseEvent& event)
 {
+    // Nếu đang ở chế độ chọn node, xử lý selection trước
+    if (m_selectionMode) {
+        HandleNodeSelection(event.GetPosition());
+        return; // Không cho drag trong chế độ selection
+    }
+
+    // Chế độ bình thường: cho phép drag map
     m_isDragging = true;
     m_dragStart = event.GetPosition();
     CaptureMouse();
@@ -1080,4 +1095,83 @@ void MapPanel::OnZoomOutClicked(wxCommandEvent& event)
 
     UpdateScaledBitmap();
     Refresh();
+}
+
+// Các hàm xử lý selection mode
+void MapPanel::SetSelectionMode(bool enable) {
+    m_selectionMode = enable;
+
+    if (enable) {
+        ResetSelection();
+        ClearAllPaths();
+
+        
+        m_activeNodes.clear();
+        for (size_t i = 0; i < m_nodes.size(); ++i) {
+            if (m_nodes[i].isBigNode) {
+                m_activeNodes.insert(i);
+            }
+        }
+    }
+    else {
+        m_activeNodes.clear();
+        m_showAllNodes = false;
+    }
+
+    Refresh();
+}
+
+void MapPanel::ResetSelection() {
+    m_selectedNode = -1;
+}
+
+void MapPanel::HandleNodeSelection(const wxPoint& clickPos)
+{
+    // Tìm node gần nhất được click
+    int clickedNode = -1;
+    double minDist = 20.0;
+
+    for (size_t i = 0; i < m_nodes.size(); ++i) {
+        if (!m_nodes[i].isBigNode) continue;
+
+        wxPoint screenPos(
+            m_nodes[i].pos.x * m_scale + m_offset.x,
+            m_nodes[i].pos.y * m_scale + m_offset.y
+        );
+
+        double dist = sqrt(pow(clickPos.x - screenPos.x, 2) +
+            pow(clickPos.y - screenPos.y, 2));
+
+        if (dist < minDist) {
+            minDist = dist;
+            clickedNode = i;
+        }
+    }
+
+    if (clickedNode == -1) return;
+
+    if (m_selectedNode == -1) {
+        // Chọn điểm đi
+        m_selectedNode = clickedNode;
+        m_startNodeIndex = clickedNode;
+        Refresh();
+    }
+    else {
+        // Chọn điểm đến
+        if (clickedNode == m_selectedNode) {
+            wxMessageBox(_T("Điểm đi và đến không được trùng!"),
+                _T("Lỗi"), wxOK | wxICON_WARNING);
+            return;
+        }
+
+        m_endNodeIndex = clickedNode;
+        m_selectionMode = false;
+
+        FindAndDrawNewPath(m_selectedNode, clickedNode);
+
+        // Gửi event về SearchPanel
+        if (m_searchPanel) {
+            m_searchPanel->UpdateRouteSelection(m_selectedNode, clickedNode);
+        }
+    }
 }

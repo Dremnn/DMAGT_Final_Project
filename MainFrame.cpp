@@ -36,6 +36,7 @@ void MainFrame::SetupModernUI()
 
     // 3. Connect the panels (existing functionality)
     searchPanel->SetMapPanel(mapPanel);
+    mapPanel->SetSearchPanel(searchPanel);
 
     // 4. Setup layout with modern spacing
     // Sidebar: fixed width with padding all around
