@@ -348,6 +348,7 @@ void SearchPanel::OnSelectRouteClicked(wxCommandEvent& event) {
     }
 }
 
+//Update diểm đi/điểm đến after choosing on map
 void SearchPanel::UpdateRouteSelection(int startIdx, int endIdx) {
     if (!m_mapPanel) return;
 
