@@ -215,7 +215,6 @@ void MapPanel::OnPaint(wxPaintEvent& event)
     }
 }
 
-
 int MapPanel::FindNodeIndexByName(const wxString& name) const
 {
     wxString normalizedName = NormalizeString(name);
@@ -234,6 +233,9 @@ void MapPanel::FindAndDrawNewPath(int startIndex, int endIndex)
 {
     m_path = findShortestPath(startIndex, endIndex, m_nodes, m_adajacentList);
 
+    m_startNodeIndex = startIndex;
+    m_endNodeIndex = endIndex;
+        
     // Tính khoảng cách
     double pathLength = 0.0;
     for (const auto& edge : m_path) {
@@ -258,6 +260,9 @@ void MapPanel::FindAndDrawNewPath(int startIndex, int endIndex)
 
 void MapPanel::FindAndDrawAllPaths(int startIndex, int endIndex)
 {
+    m_startNodeIndex = startIndex;  
+    m_endNodeIndex = endIndex;     
+
     // Tìm tất cả đường đi
     m_allPaths = FindAllPaths(startIndex, endIndex, m_nodes, m_adajacentList);
 
@@ -283,248 +288,260 @@ void MapPanel::FindAndDrawAllPaths(int startIndex, int endIndex)
     Refresh();
 }
 
+void MapPanel::ClearAllPaths()
+{
+    m_path.clear();
+    m_allPaths.clear();
+    m_activeNodes.clear();
+    m_showAllNodes = false;
+    m_startNodeIndex = -1;  
+    m_endNodeIndex = -1;     
+    HideRouteInfo();
+    Refresh();
+}
+
 // Tạo đồ thị từ các node đã định nghĩa
 void MapPanel::CreateGraph() {
     m_adajacentList.clear();
 
     // Dinh Độc Lập -> Nhà Thờ Đức Bà
      //Route 1: Djikstra
-    m_adajacentList[0][6] = caculateDistance(m_nodes[0].pos, m_nodes[6].pos);
-    m_adajacentList[6][7] = caculateDistance(m_nodes[6].pos, m_nodes[7].pos);
-    m_adajacentList[7][1] = caculateDistance(m_nodes[7].pos, m_nodes[1].pos);
+    m_adajacentList[0][6] = calculateDistance(m_nodes[0].pos, m_nodes[6].pos);
+    m_adajacentList[6][7] = calculateDistance(m_nodes[6].pos, m_nodes[7].pos);
+    m_adajacentList[7][1] = calculateDistance(m_nodes[7].pos, m_nodes[1].pos);
     //Route 2:
-    m_adajacentList[0][8] = caculateDistance(m_nodes[0].pos, m_nodes[8].pos);
-    m_adajacentList[8][9] = caculateDistance(m_nodes[8].pos, m_nodes[9].pos);
-    m_adajacentList[9][10] = caculateDistance(m_nodes[9].pos, m_nodes[10].pos);
-    m_adajacentList[10][11] = caculateDistance(m_nodes[10].pos, m_nodes[11].pos);
-    m_adajacentList[11][1] = caculateDistance(m_nodes[11].pos, m_nodes[1].pos);
+    m_adajacentList[0][8] = calculateDistance(m_nodes[0].pos, m_nodes[8].pos);
+    m_adajacentList[8][9] = calculateDistance(m_nodes[8].pos, m_nodes[9].pos);
+    m_adajacentList[9][10] = calculateDistance(m_nodes[9].pos, m_nodes[10].pos);
+    m_adajacentList[10][11] = calculateDistance(m_nodes[10].pos, m_nodes[11].pos);
+    m_adajacentList[11][1] = calculateDistance(m_nodes[11].pos, m_nodes[1].pos);
     //Dinh Doc Lap -> Buu Dien Trung Tam
     //Route 1: Djikstra
-    m_adajacentList[0][6] = caculateDistance(m_nodes[0].pos, m_nodes[6].pos);
-    m_adajacentList[6][7] = caculateDistance(m_nodes[6].pos, m_nodes[7].pos);
-    m_adajacentList[7][12] = caculateDistance(m_nodes[7].pos, m_nodes[12].pos);
-    m_adajacentList[12][13] = caculateDistance(m_nodes[12].pos, m_nodes[13].pos);
-    m_adajacentList[13][2] = caculateDistance(m_nodes[13].pos, m_nodes[2].pos);
+    m_adajacentList[0][6] = calculateDistance(m_nodes[0].pos, m_nodes[6].pos);
+    m_adajacentList[6][7] = calculateDistance(m_nodes[6].pos, m_nodes[7].pos);
+    m_adajacentList[7][12] = calculateDistance(m_nodes[7].pos, m_nodes[12].pos);
+    m_adajacentList[12][13] = calculateDistance(m_nodes[12].pos, m_nodes[13].pos);
+    m_adajacentList[13][2] = calculateDistance(m_nodes[13].pos, m_nodes[2].pos);
     //Route 2:
-    m_adajacentList[0][14] = caculateDistance(m_nodes[0].pos, m_nodes[14].pos);
-    m_adajacentList[14][10] = caculateDistance(m_nodes[14].pos, m_nodes[10].pos);
-    m_adajacentList[10][11] = caculateDistance(m_nodes[10].pos, m_nodes[8].pos);
-    m_adajacentList[11][12] = caculateDistance(m_nodes[8].pos, m_nodes[12].pos);
-    m_adajacentList[12][13] = caculateDistance(m_nodes[12].pos, m_nodes[13].pos);
-    m_adajacentList[13][2] = caculateDistance(m_nodes[13].pos, m_nodes[2].pos);
+    m_adajacentList[0][14] = calculateDistance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][10] = calculateDistance(m_nodes[14].pos, m_nodes[10].pos);
+    m_adajacentList[10][11] = calculateDistance(m_nodes[10].pos, m_nodes[8].pos);
+    m_adajacentList[11][12] = calculateDistance(m_nodes[8].pos, m_nodes[12].pos);
+    m_adajacentList[12][13] = calculateDistance(m_nodes[12].pos, m_nodes[13].pos);
+    m_adajacentList[13][2] = calculateDistance(m_nodes[13].pos, m_nodes[2].pos);
     //Dinh Doc Lap -> Cho Ben Thanh
     //Route 1: Djikstra
-    m_adajacentList[0][14] = caculateDistance(m_nodes[0].pos, m_nodes[14].pos);
-    m_adajacentList[14][15] = caculateDistance(m_nodes[14].pos, m_nodes[15].pos);
-    m_adajacentList[15][16] = caculateDistance(m_nodes[15].pos, m_nodes[16].pos);
-    m_adajacentList[16][17] = caculateDistance(m_nodes[16].pos, m_nodes[17].pos);
-    m_adajacentList[17][18] = caculateDistance(m_nodes[17].pos, m_nodes[18].pos);
-    m_adajacentList[18][19] = caculateDistance(m_nodes[18].pos, m_nodes[19].pos);
-    m_adajacentList[19][3] = caculateDistance(m_nodes[19].pos, m_nodes[3].pos);
+    m_adajacentList[0][14] = calculateDistance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = calculateDistance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][16] = calculateDistance(m_nodes[15].pos, m_nodes[16].pos);
+    m_adajacentList[16][17] = calculateDistance(m_nodes[16].pos, m_nodes[17].pos);
+    m_adajacentList[17][18] = calculateDistance(m_nodes[17].pos, m_nodes[18].pos);
+    m_adajacentList[18][19] = calculateDistance(m_nodes[18].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = calculateDistance(m_nodes[19].pos, m_nodes[3].pos);
     //Route 2:
-    m_adajacentList[0][14] = caculateDistance(m_nodes[0].pos, m_nodes[14].pos);
-    m_adajacentList[14][15] = caculateDistance(m_nodes[14].pos, m_nodes[15].pos);
-    m_adajacentList[15][16] = caculateDistance(m_nodes[15].pos, m_nodes[16].pos);
-    m_adajacentList[16][20] = caculateDistance(m_nodes[16].pos, m_nodes[20].pos);
-    m_adajacentList[20][21] = caculateDistance(m_nodes[20].pos, m_nodes[21].pos);
-    m_adajacentList[21][17] = caculateDistance(m_nodes[21].pos, m_nodes[17].pos);
-    m_adajacentList[17][18] = caculateDistance(m_nodes[17].pos, m_nodes[18].pos);
-    m_adajacentList[18][19] = caculateDistance(m_nodes[18].pos, m_nodes[19].pos);
-    m_adajacentList[19][3] = caculateDistance(m_nodes[19].pos, m_nodes[3].pos);
+    m_adajacentList[0][14] = calculateDistance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = calculateDistance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][16] = calculateDistance(m_nodes[15].pos, m_nodes[16].pos);
+    m_adajacentList[16][20] = calculateDistance(m_nodes[16].pos, m_nodes[20].pos);
+    m_adajacentList[20][21] = calculateDistance(m_nodes[20].pos, m_nodes[21].pos);
+    m_adajacentList[21][17] = calculateDistance(m_nodes[21].pos, m_nodes[17].pos);
+    m_adajacentList[17][18] = calculateDistance(m_nodes[17].pos, m_nodes[18].pos);
+    m_adajacentList[18][19] = calculateDistance(m_nodes[18].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = calculateDistance(m_nodes[19].pos, m_nodes[3].pos);
     //Dinh Doc Lap -> Bitexco Financial Tower
     //Route 1:
-    m_adajacentList[0][14] = caculateDistance(m_nodes[0].pos, m_nodes[14].pos);
-    m_adajacentList[14][15] = caculateDistance(m_nodes[14].pos, m_nodes[15].pos);
-    m_adajacentList[15][22] = caculateDistance(m_nodes[15].pos, m_nodes[22].pos);
-    m_adajacentList[22][23] = caculateDistance(m_nodes[22].pos, m_nodes[23].pos);
-    m_adajacentList[23][5] = caculateDistance(m_nodes[23].pos, m_nodes[5].pos);
-    m_adajacentList[5][24] = caculateDistance(m_nodes[5].pos, m_nodes[24].pos);
-    m_adajacentList[24][4] = caculateDistance(m_nodes[24].pos, m_nodes[4].pos);
+    m_adajacentList[0][14] = calculateDistance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = calculateDistance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = calculateDistance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][23] = calculateDistance(m_nodes[22].pos, m_nodes[23].pos);
+    m_adajacentList[23][5] = calculateDistance(m_nodes[23].pos, m_nodes[5].pos);
+    m_adajacentList[5][24] = calculateDistance(m_nodes[5].pos, m_nodes[24].pos);
+    m_adajacentList[24][4] = calculateDistance(m_nodes[24].pos, m_nodes[4].pos);
     //Route 2:
-    m_adajacentList[0][14] = caculateDistance(m_nodes[0].pos, m_nodes[14].pos);
-    m_adajacentList[14][15] = caculateDistance(m_nodes[14].pos, m_nodes[15].pos);
-    m_adajacentList[15][22] = caculateDistance(m_nodes[15].pos, m_nodes[22].pos);
-    m_adajacentList[22][25] = caculateDistance(m_nodes[22].pos, m_nodes[25].pos);
-    m_adajacentList[25][26] = caculateDistance(m_nodes[25].pos, m_nodes[26].pos);
-    m_adajacentList[26][27] = caculateDistance(m_nodes[26].pos, m_nodes[27].pos);
-    m_adajacentList[27][28] = caculateDistance(m_nodes[27].pos, m_nodes[28].pos);
-    m_adajacentList[28][4] = caculateDistance(m_nodes[28].pos, m_nodes[4].pos);
+    m_adajacentList[0][14] = calculateDistance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = calculateDistance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = calculateDistance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][25] = calculateDistance(m_nodes[22].pos, m_nodes[25].pos);
+    m_adajacentList[25][26] = calculateDistance(m_nodes[25].pos, m_nodes[26].pos);
+    m_adajacentList[26][27] = calculateDistance(m_nodes[26].pos, m_nodes[27].pos);
+    m_adajacentList[27][28] = calculateDistance(m_nodes[27].pos, m_nodes[28].pos);
+    m_adajacentList[28][4] = calculateDistance(m_nodes[28].pos, m_nodes[4].pos);
     //Dinh Doc Lap -> Pho Di Bo Nguyen Hue
  //Route 1:
-    m_adajacentList[0][14] = caculateDistance(m_nodes[0].pos, m_nodes[14].pos);
-    m_adajacentList[14][15] = caculateDistance(m_nodes[14].pos, m_nodes[15].pos);
-    m_adajacentList[15][22] = caculateDistance(m_nodes[15].pos, m_nodes[22].pos);
-    m_adajacentList[22][23] = caculateDistance(m_nodes[22].pos, m_nodes[23].pos);
-    m_adajacentList[23][5] = caculateDistance(m_nodes[23].pos, m_nodes[5].pos);
+    m_adajacentList[0][14] = calculateDistance(m_nodes[0].pos, m_nodes[14].pos);
+    m_adajacentList[14][15] = calculateDistance(m_nodes[14].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = calculateDistance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][23] = calculateDistance(m_nodes[22].pos, m_nodes[23].pos);
+    m_adajacentList[23][5] = calculateDistance(m_nodes[23].pos, m_nodes[5].pos);
     //Route 2:
-    m_adajacentList[0][6] = caculateDistance(m_nodes[0].pos, m_nodes[6].pos);
-    m_adajacentList[6][7] = caculateDistance(m_nodes[6].pos, m_nodes[7].pos);
-    m_adajacentList[7][12] = caculateDistance(m_nodes[7].pos, m_nodes[12].pos);
-    m_adajacentList[12][29] = caculateDistance(m_nodes[12].pos, m_nodes[29].pos);
-    m_adajacentList[29][30] = caculateDistance(m_nodes[29].pos, m_nodes[30].pos);
-    m_adajacentList[30][31] = caculateDistance(m_nodes[30].pos, m_nodes[31].pos);
-    m_adajacentList[31][5] = caculateDistance(m_nodes[31].pos, m_nodes[5].pos);
+    m_adajacentList[0][6] = calculateDistance(m_nodes[0].pos, m_nodes[6].pos);
+    m_adajacentList[6][7] = calculateDistance(m_nodes[6].pos, m_nodes[7].pos);
+    m_adajacentList[7][12] = calculateDistance(m_nodes[7].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = calculateDistance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = calculateDistance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = calculateDistance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = calculateDistance(m_nodes[31].pos, m_nodes[5].pos);
 
     //Nha Tho Duc Ba -> Dinh Doc Lap
     //Route 1:
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][32] = caculateDistance(m_nodes[12].pos, m_nodes[32].pos);
-    m_adajacentList[32][33] = caculateDistance(m_nodes[32].pos, m_nodes[33].pos);
-    m_adajacentList[33][34] = caculateDistance(m_nodes[33].pos, m_nodes[34].pos);
-    m_adajacentList[34][0] = caculateDistance(m_nodes[34].pos, m_nodes[0].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][32] = calculateDistance(m_nodes[12].pos, m_nodes[32].pos);
+    m_adajacentList[32][33] = calculateDistance(m_nodes[32].pos, m_nodes[33].pos);
+    m_adajacentList[33][34] = calculateDistance(m_nodes[33].pos, m_nodes[34].pos);
+    m_adajacentList[34][0] = calculateDistance(m_nodes[34].pos, m_nodes[0].pos);
     //Route 2:
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][13] = caculateDistance(m_nodes[12].pos, m_nodes[13].pos);
-    m_adajacentList[13][35] = caculateDistance(m_nodes[13].pos, m_nodes[35].pos);
-    m_adajacentList[35][36] = caculateDistance(m_nodes[35].pos, m_nodes[36].pos);
-    m_adajacentList[36][37] = caculateDistance(m_nodes[36].pos, m_nodes[37].pos);
-    m_adajacentList[37][34] = caculateDistance(m_nodes[37].pos, m_nodes[34].pos);
-    m_adajacentList[34][0] = caculateDistance(m_nodes[34].pos, m_nodes[0].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][13] = calculateDistance(m_nodes[12].pos, m_nodes[13].pos);
+    m_adajacentList[13][35] = calculateDistance(m_nodes[13].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = calculateDistance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][37] = calculateDistance(m_nodes[36].pos, m_nodes[37].pos);
+    m_adajacentList[37][34] = calculateDistance(m_nodes[37].pos, m_nodes[34].pos);
+    m_adajacentList[34][0] = calculateDistance(m_nodes[34].pos, m_nodes[0].pos);
     //Nha Tho Duc Ba -> Buu Dien Trung Tam
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][13] = caculateDistance(m_nodes[12].pos, m_nodes[13].pos);
-    m_adajacentList[13][2] = caculateDistance(m_nodes[13].pos, m_nodes[2].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][13] = calculateDistance(m_nodes[12].pos, m_nodes[13].pos);
+    m_adajacentList[13][2] = calculateDistance(m_nodes[13].pos, m_nodes[2].pos);
     //Nha Tho Duc Ba -> Cho Ben Thanh
     //Route 1:
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][15] = caculateDistance(m_nodes[12].pos, m_nodes[15].pos);
-    m_adajacentList[15][16] = caculateDistance(m_nodes[15].pos, m_nodes[16].pos);
-    m_adajacentList[16][17] = caculateDistance(m_nodes[16].pos, m_nodes[17].pos);
-    m_adajacentList[17][18] = caculateDistance(m_nodes[17].pos, m_nodes[18].pos);
-    m_adajacentList[18][19] = caculateDistance(m_nodes[18].pos, m_nodes[19].pos);
-    m_adajacentList[19][3] = caculateDistance(m_nodes[19].pos, m_nodes[3].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][15] = calculateDistance(m_nodes[12].pos, m_nodes[15].pos);
+    m_adajacentList[15][16] = calculateDistance(m_nodes[15].pos, m_nodes[16].pos);
+    m_adajacentList[16][17] = calculateDistance(m_nodes[16].pos, m_nodes[17].pos);
+    m_adajacentList[17][18] = calculateDistance(m_nodes[17].pos, m_nodes[18].pos);
+    m_adajacentList[18][19] = calculateDistance(m_nodes[18].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = calculateDistance(m_nodes[19].pos, m_nodes[3].pos);
     //Route 2:
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][29] = caculateDistance(m_nodes[12].pos, m_nodes[29].pos);
-    m_adajacentList[29][30] = caculateDistance(m_nodes[29].pos, m_nodes[30].pos);
-    m_adajacentList[30][31] = caculateDistance(m_nodes[30].pos, m_nodes[31].pos);
-    m_adajacentList[31][38] = caculateDistance(m_nodes[31].pos, m_nodes[38].pos);
-    m_adajacentList[38][19] = caculateDistance(m_nodes[38].pos, m_nodes[19].pos);
-    m_adajacentList[19][3] = caculateDistance(m_nodes[19].pos, m_nodes[3].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = calculateDistance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = calculateDistance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = calculateDistance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][38] = calculateDistance(m_nodes[31].pos, m_nodes[38].pos);
+    m_adajacentList[38][19] = calculateDistance(m_nodes[38].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = calculateDistance(m_nodes[19].pos, m_nodes[3].pos);
     //Nha Tho Duc Ba -> Bitexco Financial Tower
  //Route 1:
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][29] = caculateDistance(m_nodes[12].pos, m_nodes[29].pos);
-    m_adajacentList[29][30] = caculateDistance(m_nodes[29].pos, m_nodes[30].pos);
-    m_adajacentList[30][31] = caculateDistance(m_nodes[30].pos, m_nodes[31].pos);
-    m_adajacentList[31][5] = caculateDistance(m_nodes[31].pos, m_nodes[5].pos);
-    m_adajacentList[5][24] = caculateDistance(m_nodes[5].pos, m_nodes[24].pos);
-    m_adajacentList[24][4] = caculateDistance(m_nodes[24].pos, m_nodes[4].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = calculateDistance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = calculateDistance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = calculateDistance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = calculateDistance(m_nodes[31].pos, m_nodes[5].pos);
+    m_adajacentList[5][24] = calculateDistance(m_nodes[5].pos, m_nodes[24].pos);
+    m_adajacentList[24][4] = calculateDistance(m_nodes[24].pos, m_nodes[4].pos);
     //Route 2:
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][15] = caculateDistance(m_nodes[12].pos, m_nodes[15].pos);
-    m_adajacentList[15][22] = caculateDistance(m_nodes[15].pos, m_nodes[22].pos);
-    m_adajacentList[22][25] = caculateDistance(m_nodes[22].pos, m_nodes[25].pos);
-    m_adajacentList[25][26] = caculateDistance(m_nodes[25].pos, m_nodes[26].pos);
-    m_adajacentList[26][27] = caculateDistance(m_nodes[26].pos, m_nodes[27].pos);
-    m_adajacentList[27][28] = caculateDistance(m_nodes[27].pos, m_nodes[28].pos);
-    m_adajacentList[28][4] = caculateDistance(m_nodes[28].pos, m_nodes[4].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][15] = calculateDistance(m_nodes[12].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = calculateDistance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][25] = calculateDistance(m_nodes[22].pos, m_nodes[25].pos);
+    m_adajacentList[25][26] = calculateDistance(m_nodes[25].pos, m_nodes[26].pos);
+    m_adajacentList[26][27] = calculateDistance(m_nodes[26].pos, m_nodes[27].pos);
+    m_adajacentList[27][28] = calculateDistance(m_nodes[27].pos, m_nodes[28].pos);
+    m_adajacentList[28][4] = calculateDistance(m_nodes[28].pos, m_nodes[4].pos);
     //Nha Tho Duc Ba -> Pho di bo Nguyen Hue
     //Route 1:
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][29] = caculateDistance(m_nodes[12].pos, m_nodes[29].pos);
-    m_adajacentList[29][30] = caculateDistance(m_nodes[29].pos, m_nodes[30].pos);
-    m_adajacentList[30][31] = caculateDistance(m_nodes[30].pos, m_nodes[31].pos);
-    m_adajacentList[31][5] = caculateDistance(m_nodes[31].pos, m_nodes[5].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = calculateDistance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = calculateDistance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = calculateDistance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = calculateDistance(m_nodes[31].pos, m_nodes[5].pos);
 
     //Buu Dien Trung Tam -> Dinh Doc Lap
     //Route 1:
-    m_adajacentList[2][35] = caculateDistance(m_nodes[2].pos, m_nodes[35].pos);
-    m_adajacentList[35][36] = caculateDistance(m_nodes[35].pos, m_nodes[36].pos);
-    m_adajacentList[36][37] = caculateDistance(m_nodes[36].pos, m_nodes[37].pos);
-    m_adajacentList[37][34] = caculateDistance(m_nodes[37].pos, m_nodes[34].pos);
-    m_adajacentList[34][0] = caculateDistance(m_nodes[34].pos, m_nodes[0].pos);
+    m_adajacentList[2][35] = calculateDistance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = calculateDistance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][37] = calculateDistance(m_nodes[36].pos, m_nodes[37].pos);
+    m_adajacentList[37][34] = calculateDistance(m_nodes[37].pos, m_nodes[34].pos);
+    m_adajacentList[34][0] = calculateDistance(m_nodes[34].pos, m_nodes[0].pos);
     //Route 2:
-    m_adajacentList[2][35] = caculateDistance(m_nodes[2].pos, m_nodes[35].pos);
-    m_adajacentList[35][36] = caculateDistance(m_nodes[35].pos, m_nodes[36].pos);
-    m_adajacentList[36][6] = caculateDistance(m_nodes[36].pos, m_nodes[6].pos);
-    m_adajacentList[6][39] = caculateDistance(m_nodes[6].pos, m_nodes[39].pos);
-    m_adajacentList[39][33] = caculateDistance(m_nodes[39].pos, m_nodes[33].pos);
-    m_adajacentList[33][34] = caculateDistance(m_nodes[33].pos, m_nodes[34].pos);
-    m_adajacentList[34][0] = caculateDistance(m_nodes[34].pos, m_nodes[0].pos);
+    m_adajacentList[2][35] = calculateDistance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = calculateDistance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][6] = calculateDistance(m_nodes[36].pos, m_nodes[6].pos);
+    m_adajacentList[6][39] = calculateDistance(m_nodes[6].pos, m_nodes[39].pos);
+    m_adajacentList[39][33] = calculateDistance(m_nodes[39].pos, m_nodes[33].pos);
+    m_adajacentList[33][34] = calculateDistance(m_nodes[33].pos, m_nodes[34].pos);
+    m_adajacentList[34][0] = calculateDistance(m_nodes[34].pos, m_nodes[0].pos);
     //Buu Dien Trung Tam -> Nha Tho Duc Ba
-    m_adajacentList[2][35] = caculateDistance(m_nodes[2].pos, m_nodes[35].pos);
-    m_adajacentList[35][36] = caculateDistance(m_nodes[35].pos, m_nodes[36].pos);
-    m_adajacentList[36][40] = caculateDistance(m_nodes[36].pos, m_nodes[40].pos);
-    m_adajacentList[40][1] = caculateDistance(m_nodes[40].pos, m_nodes[1].pos);
+    m_adajacentList[2][35] = calculateDistance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = calculateDistance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][40] = calculateDistance(m_nodes[36].pos, m_nodes[40].pos);
+    m_adajacentList[40][1] = calculateDistance(m_nodes[40].pos, m_nodes[1].pos);
     //Buu Dien Trung Tam -> Cho Ben Thanh
-    m_adajacentList[2][35] = caculateDistance(m_nodes[2].pos, m_nodes[35].pos);
-    m_adajacentList[35][36] = caculateDistance(m_nodes[35].pos, m_nodes[36].pos);
-    m_adajacentList[36][40] = caculateDistance(m_nodes[36].pos, m_nodes[40].pos);
-    m_adajacentList[40][6] = caculateDistance(m_nodes[40].pos, m_nodes[6].pos);
-    m_adajacentList[6][0] = caculateDistance(m_nodes[6].pos, m_nodes[0].pos);
-    m_adajacentList[0][15] = caculateDistance(m_nodes[0].pos, m_nodes[15].pos);
-    m_adajacentList[15][22] = caculateDistance(m_nodes[15].pos, m_nodes[22].pos);
-    m_adajacentList[22][17] = caculateDistance(m_nodes[22].pos, m_nodes[17].pos);
-    m_adajacentList[17][18] = caculateDistance(m_nodes[17].pos, m_nodes[18].pos);
-    m_adajacentList[18][41] = caculateDistance(m_nodes[18].pos, m_nodes[41].pos);
-    m_adajacentList[41][38] = caculateDistance(m_nodes[41].pos, m_nodes[38].pos);
-    m_adajacentList[38][18] = caculateDistance(m_nodes[38].pos, m_nodes[18].pos);
-    m_adajacentList[18][19] = caculateDistance(m_nodes[18].pos, m_nodes[19].pos);
-    m_adajacentList[19][3] = caculateDistance(m_nodes[19].pos, m_nodes[3].pos);
+    m_adajacentList[2][35] = calculateDistance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = calculateDistance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][40] = calculateDistance(m_nodes[36].pos, m_nodes[40].pos);
+    m_adajacentList[40][6] = calculateDistance(m_nodes[40].pos, m_nodes[6].pos);
+    m_adajacentList[6][0] = calculateDistance(m_nodes[6].pos, m_nodes[0].pos);
+    m_adajacentList[0][15] = calculateDistance(m_nodes[0].pos, m_nodes[15].pos);
+    m_adajacentList[15][22] = calculateDistance(m_nodes[15].pos, m_nodes[22].pos);
+    m_adajacentList[22][17] = calculateDistance(m_nodes[22].pos, m_nodes[17].pos);
+    m_adajacentList[17][18] = calculateDistance(m_nodes[17].pos, m_nodes[18].pos);
+    m_adajacentList[18][41] = calculateDistance(m_nodes[18].pos, m_nodes[41].pos);
+    m_adajacentList[41][38] = calculateDistance(m_nodes[41].pos, m_nodes[38].pos);
+    m_adajacentList[38][18] = calculateDistance(m_nodes[38].pos, m_nodes[18].pos);
+    m_adajacentList[18][19] = calculateDistance(m_nodes[18].pos, m_nodes[19].pos);
+    m_adajacentList[19][3] = calculateDistance(m_nodes[19].pos, m_nodes[3].pos);
     //Buu Dien Trung Tam -> Bitexco Financial Tower
-    m_adajacentList[2][35] = caculateDistance(m_nodes[2].pos, m_nodes[35].pos);
-    m_adajacentList[35][36] = caculateDistance(m_nodes[35].pos, m_nodes[36].pos);
-    m_adajacentList[36][40] = caculateDistance(m_nodes[36].pos, m_nodes[40].pos);
-    m_adajacentList[40][1] = caculateDistance(m_nodes[40].pos, m_nodes[1].pos);
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][29] = caculateDistance(m_nodes[12].pos, m_nodes[29].pos);
-    m_adajacentList[29][30] = caculateDistance(m_nodes[29].pos, m_nodes[30].pos);
-    m_adajacentList[30][31] = caculateDistance(m_nodes[30].pos, m_nodes[31].pos);
-    m_adajacentList[31][5] = caculateDistance(m_nodes[31].pos, m_nodes[5].pos);
-    m_adajacentList[5][24] = caculateDistance(m_nodes[5].pos, m_nodes[24].pos);
-    m_adajacentList[24][4] = caculateDistance(m_nodes[24].pos, m_nodes[4].pos);
+    m_adajacentList[2][35] = calculateDistance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = calculateDistance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][40] = calculateDistance(m_nodes[36].pos, m_nodes[40].pos);
+    m_adajacentList[40][1] = calculateDistance(m_nodes[40].pos, m_nodes[1].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = calculateDistance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = calculateDistance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = calculateDistance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = calculateDistance(m_nodes[31].pos, m_nodes[5].pos);
+    m_adajacentList[5][24] = calculateDistance(m_nodes[5].pos, m_nodes[24].pos);
+    m_adajacentList[24][4] = calculateDistance(m_nodes[24].pos, m_nodes[4].pos);
     //Buu Dien Trung Tam -> Pho Di Bo Nguyen Hue
-    m_adajacentList[2][35] = caculateDistance(m_nodes[2].pos, m_nodes[35].pos);
-    m_adajacentList[35][36] = caculateDistance(m_nodes[35].pos, m_nodes[36].pos);
-    m_adajacentList[36][40] = caculateDistance(m_nodes[36].pos, m_nodes[40].pos);
-    m_adajacentList[40][1] = caculateDistance(m_nodes[40].pos, m_nodes[1].pos);
-    m_adajacentList[1][12] = caculateDistance(m_nodes[1].pos, m_nodes[12].pos);
-    m_adajacentList[12][29] = caculateDistance(m_nodes[12].pos, m_nodes[29].pos);
-    m_adajacentList[29][30] = caculateDistance(m_nodes[29].pos, m_nodes[30].pos);
-    m_adajacentList[30][31] = caculateDistance(m_nodes[30].pos, m_nodes[31].pos);
-    m_adajacentList[31][5] = caculateDistance(m_nodes[31].pos, m_nodes[5].pos);
+    m_adajacentList[2][35] = calculateDistance(m_nodes[2].pos, m_nodes[35].pos);
+    m_adajacentList[35][36] = calculateDistance(m_nodes[35].pos, m_nodes[36].pos);
+    m_adajacentList[36][40] = calculateDistance(m_nodes[36].pos, m_nodes[40].pos);
+    m_adajacentList[40][1] = calculateDistance(m_nodes[40].pos, m_nodes[1].pos);
+    m_adajacentList[1][12] = calculateDistance(m_nodes[1].pos, m_nodes[12].pos);
+    m_adajacentList[12][29] = calculateDistance(m_nodes[12].pos, m_nodes[29].pos);
+    m_adajacentList[29][30] = calculateDistance(m_nodes[29].pos, m_nodes[30].pos);
+    m_adajacentList[30][31] = calculateDistance(m_nodes[30].pos, m_nodes[31].pos);
+    m_adajacentList[31][5] = calculateDistance(m_nodes[31].pos, m_nodes[5].pos);
     //Cho Ben Thanh -> Dinh Doc Lap
-    m_adajacentList[3][41] = caculateDistance(m_nodes[3].pos, m_nodes[41].pos);
-    m_adajacentList[41][42] = caculateDistance(m_nodes[41].pos, m_nodes[42].pos);
-    m_adajacentList[42][43] = caculateDistance(m_nodes[42].pos, m_nodes[43].pos);
-    m_adajacentList[43][44] = caculateDistance(m_nodes[43].pos, m_nodes[44].pos);
-    m_adajacentList[44][45] = caculateDistance(m_nodes[44].pos, m_nodes[45].pos);
-    m_adajacentList[45][46] = caculateDistance(m_nodes[45].pos, m_nodes[46].pos);
-    m_adajacentList[46][0] = caculateDistance(m_nodes[46].pos, m_nodes[0].pos);
+    m_adajacentList[3][41] = calculateDistance(m_nodes[3].pos, m_nodes[41].pos);
+    m_adajacentList[41][42] = calculateDistance(m_nodes[41].pos, m_nodes[42].pos);
+    m_adajacentList[42][43] = calculateDistance(m_nodes[42].pos, m_nodes[43].pos);
+    m_adajacentList[43][44] = calculateDistance(m_nodes[43].pos, m_nodes[44].pos);
+    m_adajacentList[44][45] = calculateDistance(m_nodes[44].pos, m_nodes[45].pos);
+    m_adajacentList[45][46] = calculateDistance(m_nodes[45].pos, m_nodes[46].pos);
+    m_adajacentList[46][0] = calculateDistance(m_nodes[46].pos, m_nodes[0].pos);
 	//Cho Ben Thanh -> Nha Tho Duc Ba
-    m_adajacentList[3][47] = caculateDistance(m_nodes[3].pos, m_nodes[47].pos);
-    m_adajacentList[47][48] = caculateDistance(m_nodes[47].pos, m_nodes[48].pos);
-    m_adajacentList[48][49] = caculateDistance(m_nodes[48].pos, m_nodes[49].pos);
-    m_adajacentList[49][50] = caculateDistance(m_nodes[49].pos, m_nodes[50].pos);
-    m_adajacentList[50][51] = caculateDistance(m_nodes[50].pos, m_nodes[51].pos);
-    m_adajacentList[51][1] = caculateDistance(m_nodes[51].pos, m_nodes[1].pos);
+    m_adajacentList[3][47] = calculateDistance(m_nodes[3].pos, m_nodes[47].pos);
+    m_adajacentList[47][48] = calculateDistance(m_nodes[47].pos, m_nodes[48].pos);
+    m_adajacentList[48][49] = calculateDistance(m_nodes[48].pos, m_nodes[49].pos);
+    m_adajacentList[49][50] = calculateDistance(m_nodes[49].pos, m_nodes[50].pos);
+    m_adajacentList[50][51] = calculateDistance(m_nodes[50].pos, m_nodes[51].pos);
+    m_adajacentList[51][1] = calculateDistance(m_nodes[51].pos, m_nodes[1].pos);
     //Cho Ben Thanh -> Pho Di Bo Nguyen Hue
-    m_adajacentList[3][47] = caculateDistance(m_nodes[3].pos, m_nodes[47].pos);
-    m_adajacentList[47][48] = caculateDistance(m_nodes[47].pos, m_nodes[48].pos);
-    m_adajacentList[48][5] = caculateDistance(m_nodes[48].pos, m_nodes[5].pos);
+    m_adajacentList[3][47] = calculateDistance(m_nodes[3].pos, m_nodes[47].pos);
+    m_adajacentList[47][48] = calculateDistance(m_nodes[47].pos, m_nodes[48].pos);
+    m_adajacentList[48][5] = calculateDistance(m_nodes[48].pos, m_nodes[5].pos);
 	//Cho Ben Thanh -> Bitexco Financial Tower
 	//Cho Ben Thanh -> Buu Dien Trung Tam
 	//PDBNH-> Dinh Doc Lap
-    m_adajacentList[5][48] = caculateDistance(m_nodes[5].pos, m_nodes[48].pos);
-    m_adajacentList[48][49] = caculateDistance(m_nodes[48].pos, m_nodes[49].pos);
-    m_adajacentList[49][50] = caculateDistance(m_nodes[49].pos, m_nodes[50].pos);
-	m_adajacentList[50][52] = caculateDistance(m_nodes[50].pos, m_nodes[52].pos);
-    m_adajacentList[52][46] = caculateDistance(m_nodes[52].pos, m_nodes[46].pos);
-	m_adajacentList[46][0] = caculateDistance(m_nodes[46].pos, m_nodes[0].pos);
+    m_adajacentList[5][48] = calculateDistance(m_nodes[5].pos, m_nodes[48].pos);
+    m_adajacentList[48][49] = calculateDistance(m_nodes[48].pos, m_nodes[49].pos);
+    m_adajacentList[49][50] = calculateDistance(m_nodes[49].pos, m_nodes[50].pos);
+	m_adajacentList[50][52] = calculateDistance(m_nodes[50].pos, m_nodes[52].pos);
+    m_adajacentList[52][46] = calculateDistance(m_nodes[52].pos, m_nodes[46].pos);
+	m_adajacentList[46][0] = calculateDistance(m_nodes[46].pos, m_nodes[0].pos);
 	//PDBNH -> Cho Ben Thanh
-    m_adajacentList[5][48] = caculateDistance(m_nodes[5].pos, m_nodes[48].pos);
-    m_adajacentList[48][47] = caculateDistance(m_nodes[48].pos, m_nodes[47].pos);
-    m_adajacentList[47][3] = caculateDistance(m_nodes[47].pos, m_nodes[3].pos);
+    m_adajacentList[5][48] = calculateDistance(m_nodes[5].pos, m_nodes[48].pos);
+    m_adajacentList[48][47] = calculateDistance(m_nodes[48].pos, m_nodes[47].pos);
+    m_adajacentList[47][3] = calculateDistance(m_nodes[47].pos, m_nodes[3].pos);
     //Bitexco -> Dinh Doc Lap
-    m_adajacentList[4][53] = caculateDistance(m_nodes[4].pos, m_nodes[53].pos);
-    m_adajacentList[53][54] = caculateDistance(m_nodes[53].pos, m_nodes[54].pos);
-    m_adajacentList[54][55] = caculateDistance(m_nodes[54].pos, m_nodes[55].pos);
-    m_adajacentList[55][47] = caculateDistance(m_nodes[55].pos, m_nodes[47].pos);
-    m_adajacentList[47][3] = caculateDistance(m_nodes[47].pos, m_nodes[3].pos);
+    m_adajacentList[4][53] = calculateDistance(m_nodes[4].pos, m_nodes[53].pos);
+    m_adajacentList[53][54] = calculateDistance(m_nodes[53].pos, m_nodes[54].pos);
+    m_adajacentList[54][55] = calculateDistance(m_nodes[54].pos, m_nodes[55].pos);
+    m_adajacentList[55][47] = calculateDistance(m_nodes[55].pos, m_nodes[47].pos);
+    m_adajacentList[47][3] = calculateDistance(m_nodes[47].pos, m_nodes[3].pos);
     //Bitexco -> PDBNH
-    m_adajacentList[4][56] = caculateDistance(m_nodes[4].pos, m_nodes[56].pos);
-    m_adajacentList[56][5] = caculateDistance(m_nodes[56].pos, m_nodes[5].pos);
+    m_adajacentList[4][56] = calculateDistance(m_nodes[4].pos, m_nodes[56].pos);
+    m_adajacentList[56][5] = calculateDistance(m_nodes[56].pos, m_nodes[5].pos);
 
 }
 
@@ -535,24 +552,44 @@ void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
         static_cast<int>(node.pos.y * m_scale + m_offset.y)
     );
 
+    // Tìm index của node hiện tại
+    int currentIndex = -1;
+    for (size_t i = 0; i < m_nodes.size(); ++i) {
+        if (m_nodes[i].pos == node.pos) {
+            currentIndex = i;
+            break;
+        }
+    }
+
+    // Kiểm tra xem có phải node start/end không
+    bool isStartNode = (currentIndex == m_startNodeIndex);
+    bool isEndNode = (currentIndex == m_endNodeIndex);
+
     if (node.isBigNode) {
-        dc.SetBrush(*wxRED_BRUSH);
-        dc.DrawCircle(screenPos, 5);
+        // Chỉ vẽ node lớn nếu là start hoặc end
+        if (isStartNode) {
+            // Node điểm đi - màu xanh lá
+            dc.SetBrush(wxBrush(ModernColors::PRIMARY_GREEN));
+            dc.SetPen(wxPen(ModernColors::DARK_GREEN, 2));
+            dc.DrawCircle(screenPos, 8);
+        }
+        else if (isEndNode) {
+            // Node điểm đến - màu đỏ
+            dc.SetBrush(wxBrush(ModernColors::DANGER));
+            dc.SetPen(wxPen(wxColor(200, 0, 0), 2));
+            dc.DrawCircle(screenPos, 8);
+        }
+        else {
+            // Các node lớn khác - vẽ như node nhỏ
+            dc.SetBrush(*wxBLACK_BRUSH);
+            dc.DrawCircle(screenPos, 2);
+        }
     }
     else {
+        // Node nhỏ - giữ nguyên
         dc.SetBrush(*wxBLACK_BRUSH);
-        dc.DrawCircle(screenPos, 0);
+        dc.DrawCircle(screenPos, 2);
     }
-}
-
-void MapPanel::ClearAllPaths()
-{
-    m_path.clear();
-    m_allPaths.clear();
-    m_activeNodes.clear();
-    m_showAllNodes = false;
-    HideRouteInfo();
-    Refresh();
 }
 
 // Các hàm xử lý zoom/pan

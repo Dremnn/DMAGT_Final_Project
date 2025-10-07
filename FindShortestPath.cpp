@@ -3,67 +3,63 @@
 
 using namespace std;
 
-// Hàm tính khoảng cách Euclidean giữa hai điểm
-double caculateDistance(const wxPoint& p1, const wxPoint& p2) {
-    double pixelDistance = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
-    return pixelDistance * 6.565; // Trả về khoảng cách thực tế tính bằng mét
+double calculateDistance(const wxPoint& p1, const wxPoint& p2){
+	return (sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2))) * 6.565; // 6.565 là tỉ lệ bản đồ thực tế
 }
 
-// Hàm tìm đường đi ngắn nhất bằng Dijkstra
 vector<pair<int, int>> findShortestPath(
     int first,
     int last,
-    const vector<MapNode>& nodes,               // mảng lưu các node
-    const map<int, map<int, double>>& graph)    // đồ thị ma trận kề
+    const vector<MapNode>& nodes,               
+    const map<int, map<int, double>>& graph)   
 {
     vector<pair<int, int>> shortestPath;
-    priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> pq;
     map<int, double> distances;
-    map<int, int> previousNodes;
+    map<int, int> prevNode;
+    priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> pq;
 
-    for (size_t i = 0; i < nodes.size(); ++i) {
+    for (int i = 0; i < nodes.size(); i++){
         distances[i] = INFINITY;
-        previousNodes[i] = -1;
+        prevNode[i] = -1;
     }
 
     distances[first] = 0;
     pq.push({ 0, first });
 
-    while (!pq.empty()) {
+    while (!pq.empty()){
+        int currentID = pq.top().second;
         double currentDistance = pq.top().first;
-        int currentNodeIndex = pq.top().second;
+
         pq.pop();
 
-        if (currentDistance > distances[currentNodeIndex]) {
+        if (currentDistance > distances[currentID]){
             continue;
         }
 
-        if (currentNodeIndex == last) {
+        if (currentID == last){
             break;
         }
 
-        if (graph.count(currentNodeIndex)) {
-            for (const auto& neighbor : graph.at(currentNodeIndex)) {
-                int neighborIndex = neighbor.first;
-                double weight = neighbor.second;
+        if (graph.count(currentID)){
+            for (const auto& a : graph.at(currentID)){
+                int aIndex = a.first;
+                double weight = a.second;
 
-                if (distances[currentNodeIndex] + weight < distances[neighborIndex]) {
-                    distances[neighborIndex] = distances[currentNodeIndex] + weight;
-                    previousNodes[neighborIndex] = currentNodeIndex;
-                    pq.push({ distances[neighborIndex], neighborIndex });
+                if (distances[currentID] + weight < distances[aIndex]){
+                    distances[aIndex] = distances[currentID] + weight;
+                    prevNode[aIndex] = currentID;
+                    pq.push({ distances[aIndex], aIndex });
                 }
             }
         }
     }
 
-    if (previousNodes.count(last) && previousNodes.at(last) != -1) {
-        int currentNodeIndex = last;
-        while (currentNodeIndex != -1) {
-            int previousNodeIndex = previousNodes.at(currentNodeIndex);
-            if (previousNodeIndex != -1) {
-                shortestPath.push_back({ previousNodeIndex, currentNodeIndex });
-            }
-            currentNodeIndex = previousNodeIndex;
+    if (prevNode.find(last) != prevNode.end() && prevNode.at(last) != -1){
+        int cur = last;
+        while (cur != -1){
+            int prev = prevNode.at(cur);
+            if(prev != -1) shortestPath.push_back({ prev, cur });
+            cur = prev;
         }
         reverse(shortestPath.begin(), shortestPath.end());
     }
