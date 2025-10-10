@@ -201,7 +201,16 @@ void SearchPanel::CreateSavedPlacesSection(wxBoxSizer* m_sizer)
         {_T("Bưu Điện Trung Tâm"), _T("02 Công Xã Paris, Bến Nghé, Quận 1")},
         {_T("Chợ Bến Thành"), _T("Đ. Lê Lợi, Bến Thành, Quận 1")},
         {_T("Phố Đi Bộ Nguyễn Huệ"), _T("Nguyễn Huệ, Bến Nghé, Quận 1")},
-        {_T("Bitexco Financial Tower"), _T("02 Hải Triều, Bến Nghé, Quận 1")}
+        {_T("Bitexco Financial Tower"), _T("02 Hải Triều, Bến Nghé, Quận 1")},
+		//Update more places here
+        { _T("Phố Đi Bộ Bùi Viện"), _T("Bùi Viện, Phường Phạm Ngũ Lão, Quận 1")},
+        { _T("Thảo Cầm Viên Sài Gòn"), _T("2 Nguyễn Bỉnh Khiêm, Bến Nghé, Quận 1")},
+        { _T("Chùa Ngọc Hoàng"), _T("73 Mai Thị Lựu, Đa Kao, Quận 1")},
+        { _T("Bảo Tàng Chứng tích Chiến Tranh"), _T("Phường 6, Quận 3")},
+        { _T("UBND  Thành phố Hồ Chí Minh"), _T("86 Lê Thánh Tôn, Bến Nghé, Quận 1")},
+        { _T("Bến Nhà Rồng"), _T("1 Đ. Nguyễn Tất Thành, Phường 13, Quận 4")},
+        { _T("Hotel Majestic Saigon"), _T("1 Đồng Khởi, Bến Nghé, Quận 1")}
+
     };
 
     for (const auto& place : savedDirections) {
