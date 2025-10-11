@@ -50,7 +50,7 @@ private:
     map<int, map<int, double>> m_adajacentList;
 
 	// Display nodes
-    bool m_showAllNodes = true;
+    bool m_showAllNodes = false;
     set<int> m_activeNodes;
     int m_startNodeIndex = -1;  
     int m_endNodeIndex = -1;   

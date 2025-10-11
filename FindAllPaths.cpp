@@ -6,6 +6,10 @@
 using namespace std;
 
 void findAllPaths(int first,int last, const map<int, map<int, double>>& graph, vector<int>& currentPath, set<int>& visited, vector<vector<int>>& allPaths) {
+    if (allPaths.size() == 5) {
+        return;
+    }
+    
     if (first == last) {
         allPaths.push_back(currentPath);
         return;

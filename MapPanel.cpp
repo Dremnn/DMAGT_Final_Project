@@ -703,84 +703,8 @@ void MapPanel::DrawSingleNode(wxDC& dc, const MapNode& node)
                 dc.SetPen(wxPen(wxColor(200, 0, 0), 2));
                 dc.DrawCircle(screenPos, 8);
             }
-            else {
-                dc.SetBrush(*wxBLACK_BRUSH);
-                dc.DrawCircle(screenPos, 2);
-            }
         }
     }
-    else {
-        dc.SetBrush(*wxBLACK_BRUSH);
-		dc.DrawCircle(screenPos, 2);
-    }
-
-    // Vẽ số thứ tự của node
-    if (currentIndex != -1) {
-        // Thiết lập font cho số
-        wxFont indexFont = dc.GetFont();
-        indexFont.SetPointSize(8);
-        indexFont.SetWeight(wxFONTWEIGHT_BOLD);
-        indexFont.SetFaceName(wxT("Segoe UI"));
-        dc.SetFont(indexFont);
-
-        // Chọn màu text dựa vào trạng thái node
-        if (isStartNode || isEndNode) {
-            dc.SetTextForeground(*wxWHITE);
-        }
-        else {
-            dc.SetTextForeground(wxColor(50, 50, 50));
-        }
-
-        // Vẽ số thứ tự
-        wxString indexText = wxString::Format(wxT("%d"), currentIndex);
-        wxSize textSize = dc.GetTextExtent(indexText);
-
-        // Vẽ background cho text (nếu cần)
-        wxPoint textPos(
-            screenPos.x - textSize.GetWidth() / 2,
-            screenPos.y - textSize.GetHeight() / 2
-        );
-
-        // Vẽ background trắng nhỏ cho dễ đọc (optional)
-        if (!isStartNode && !isEndNode) {
-            dc.SetBrush(wxBrush(wxColor(255, 255, 255, 200)));
-            dc.SetPen(*wxTRANSPARENT_PEN);
-            dc.DrawRectangle(
-                textPos.x - 2,
-                textPos.y - 1,
-                textSize.GetWidth() + 4,
-                textSize.GetHeight() + 2
-            );
-        }
-
-        // Vẽ text
-        dc.DrawText(indexText, textPos);
-    }
-    
-    else {
-    // Node nhỏ (giao lộ) - vẽ số thứ tự nhỏ hơn
-    dc.SetBrush(*wxBLACK_BRUSH);
-    dc.DrawCircle(screenPos, 2);
-
-    if (currentIndex != -1) {
-        // Font nhỏ hơn cho node nhỏ
-        wxFont smallFont = dc.GetFont();
-        smallFont.SetPointSize(6);
-        smallFont.SetWeight(wxFONTWEIGHT_NORMAL);
-        dc.SetFont(smallFont);
-        dc.SetTextForeground(wxColor(100, 100, 100));
-
-        wxString indexText = wxString::Format(wxT("%d"), currentIndex);
-        wxSize textSize = dc.GetTextExtent(indexText);
-
-        // Vẽ số bên cạnh node
-        dc.DrawText(indexText,
-            screenPos.x + 5,
-            screenPos.y - textSize.GetHeight() / 2
-        );
-    }
-    }
-
 }
 
 // Các hàm xử lý zoom/pan
